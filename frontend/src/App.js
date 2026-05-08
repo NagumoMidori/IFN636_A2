@@ -1,70 +1,58 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import PublicLayout from './layouts/PublicLayout';
+import AuthLayout from './layouts/AuthLayout';
+import AdminLayout from './layouts/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+
+import Homepage from './pages/Homepage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import AdminHome from './pages/AdminHome';
-import UserHome from './pages/UserHome'; 
 import TourDetail from './pages/TourDetail';
-import ManageTours from './pages/ManageTours'; 
-import EditTour from './pages/EditTour';
-import Navbar from './components/Navbar';
+import BookTour from './pages/BookTour';
+import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
-import BookTour from './pages/BookTour';  
-import Payment from './pages/Payment';    
 import EditBooking from './pages/EditBooking';
-import CancelBooking from './pages/CancelBooking'; 
+import CancelBooking from './pages/CancelBooking';
+import UserHome from './pages/UserHome';
+
+import AdminHome from './pages/AdminHome';
+import ManageTours from './pages/ManageTours';
+import EditTour from './pages/EditTour';
 import AdminOrders from './pages/AdminOrders';
 
 function App() {
-  const { user } = useAuth();
-
   return (
     <Router>
-      <Navbar />
-      
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
-          {/* 1. 首頁：動態判斷 Admin 或 User */}
-          <Route path="/" element={
-            user ? (
-              user.role === 'admin' ? <AdminHome /> : <UserHome />
-            ) : (
-              <Navigate to="/login" />
-            )
-          } />
+      <Routes>
+        {/* Auth pages: no footer */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
 
-          {/* 2. 認證路由 */}
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-          <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
-          
-          {/* 3. User 專屬：詳情與預訂流程 */}
-          <Route path="/tour/:id" element={user ? <TourDetail /> : <Navigate to="/login" />} />
-          
-          {/* 🔴 補上這兩行，預訂功能才能正常運作 */}
-          <Route path="/book-tour/:id" element={user ? <BookTour /> : <Navigate to="/login" />} />
-          <Route path="/payment" element={user ? <Payment /> : <Navigate to="/login" />} />
-          <Route path="/edit-booking/:id" element={user ? <EditBooking /> : <Navigate to="/login" />} />
-          <Route path="/my-bookings" element={user ? <MyBookings /> : <Navigate to="/login" />} />
-          <Route path="/cancel-booking/:id" element={user ? <CancelBooking /> : <Navigate to="/login" />} />
+        {/* C-end: Public Layout */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/tours/:id" element={<TourDetail />} />
 
-          {/* 4. Admin 專屬路由 */}
-          <Route 
-            path="/manage-tours" 
-            element={user?.role === 'admin' ? <ManageTours /> : <Navigate to="/" />} 
-          />
-          <Route 
-            path="/admin-orders" 
-            element={user?.role === 'admin' ? <AdminOrders /> : <Navigate to="/" />} 
-          />
-          <Route 
-            path="/edit-tour/:id" 
-            element={user?.role === 'admin' ? <EditTour /> : <Navigate to="/" />} 
-          />
+          <Route path="/book-tour/:id" element={<ProtectedRoute><BookTour /></ProtectedRoute>} />
+          <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+          <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+          <Route path="/edit-booking/:id" element={<ProtectedRoute><EditBooking /></ProtectedRoute>} />
+          <Route path="/cancel-booking/:id" element={<ProtectedRoute><CancelBooking /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><UserHome /></ProtectedRoute>} />
+        </Route>
 
-          {/* 5. 防錯路由 */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </div>
+        {/* B-end: Admin Layout */}
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminHome /></ProtectedRoute>} />
+          <Route path="/admin/tours" element={<ProtectedRoute requiredRole="admin"><ManageTours /></ProtectedRoute>} />
+          <Route path="/admin/tours/:id/edit" element={<ProtectedRoute requiredRole="admin"><EditTour /></ProtectedRoute>} />
+          <Route path="/admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminOrders /></ProtectedRoute>} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </Router>
   );
 }

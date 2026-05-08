@@ -147,3 +147,9 @@ backend/uploads/
 
 # React build output
 frontend/build/
+
+# OS files
+.DS_Store
+
+# OMC
+.omc/

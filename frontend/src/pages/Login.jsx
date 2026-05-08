@@ -1,84 +1,120 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // 🔴 修正：所有非同步請求必須在 handleSubmit 函式內部執行
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      // 1. 發送登入請求
       const response = await axiosInstance.post('/api/auth/login', formData);
-      
-      // 2. 呼叫 AuthContext 的 login 函式存入使用者資料與 Token
       login(response.data);
 
-      // 3. ✅ 統一跳轉邏輯：
-      // 不管是 Admin 還是 User，登入後都先去首頁。
-      // Admin 如果要管理，再點擊 Navbar 上的齒輪按鈕即可。
-      navigate('/');
-      
-    } catch (error) {
-      // 取得後端回傳的錯誤訊息（例如：信箱或密碼錯誤）
-      const message = error.response?.data?.message || 'Login failed. Please try again.';
-      alert(message);
+      if (response.data.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 px-4">
-      <form onSubmit={handleSubmit} className="bg-white p-8 shadow-xl rounded-2xl border border-gray-100">
-        <h1 className="text-3xl font-black mb-8 text-center text-slate-800 uppercase tracking-wider">
-          Login
-        </h1>
-        
-        <div className="space-y-4">
-          {/* Email 欄位 */}
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-            required
-          />
-          
-          {/* 密碼欄位 */}
-          <input
-            type="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-            required
-          />
-          
-          {/* 登入按鈕 - 使用藍色調符合專業質感 */}
-          <button 
-            type="submit" 
-            className="w-full bg-[#007AFF] hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-100 transition-all active:scale-95 mt-4"
-          >
-            SIGN IN
-          </button>
+    <div className="min-h-[calc(100vh-5rem)] grid grid-cols-1 lg:grid-cols-2">
+      {/* Left decorative panel - hidden on mobile */}
+      <div
+        className="hidden lg:flex items-start justify-center pt-32 p-12"
+        style={{
+          background: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/images/bondi_beach.webp')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="max-w-md text-white">
+          <h2 className="text-4xl font-bold mb-6">Welcome back</h2>
+          <p className="text-white/80 text-lg leading-relaxed">
+            Sign in to access your bookings, manage your trips, and discover new adventures across Australia.
+          </p>
+          <div className="mt-10 flex items-center gap-4 text-white/70">
+            <div className="flex -space-x-2">
+              {['A', 'B', 'C'].map((letter) => (
+                <div key={letter} className="w-10 h-10 rounded-full bg-white/20 border-2 border-white/30 backdrop-blur-sm flex items-center justify-center text-sm font-bold text-white">
+                  {letter}
+                </div>
+              ))}
+            </div>
+            <p className="text-sm">Join 1,000+ travellers exploring Australia</p>
+          </div>
         </div>
-        
-        {/* 跳轉到註冊頁面 */}
-        <div className="mt-6 flex justify-between items-center text-sm">
-          <span className="text-gray-400">Don't have an account?</span>
-          <button 
-            type="button"
-            onClick={() => navigate('/register')}
-            className="text-blue-600 font-bold hover:underline"
-          >
-            Create Account
-          </button>
+      </div>
+
+      {/* Right form panel */}
+      <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Sign in</h1>
+            <p className="mt-2 text-gray-500">Enter your credentials to continue</p>
+          </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-gray-900"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-gray-900"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <p className="mt-8 text-center text-sm text-gray-500">
+            Don't have an account?{' '}
+            <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-700">
+              Create one
+            </Link>
+          </p>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

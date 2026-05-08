@@ -69,7 +69,7 @@ Admin (separate entry)
 | Item | Status | Notes |
 |------|--------|-------|
 | 2 new features | Not decided | AI tour recommendation discussed as candidate |
-| Admin style reference | Waiting | User will provide reference images later |
+| Admin style reference | Done | PandaDoc Dashboard style — dark sidebar + white main + table data |
 | New database | Deferred | Will create new MongoDB Atlas instance, current one named "A1" |
 | CRC cards | Not started | Backend refactor blocked on this |
 | Multi-image tour support | Deferred | Single image placeholder for now |

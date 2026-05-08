@@ -57,7 +57,7 @@ const UserHome = () => {
       <h3 className="font-black text-slate-800 text-lg mb-6 tracking-tight">Recent Popular Tour</h3>
       <div className="space-y-6">
         {tours.map(tour => (
-          <div key={tour._id} onClick={() => navigate(`/tour/${tour._id}`)} className="flex items-center space-x-5 group cursor-pointer bg-white p-3 rounded-[30px] shadow-sm hover:shadow-md transition-all">
+          <div key={tour._id} onClick={() => navigate(`/tours/${tour._id}`)} className="flex items-center space-x-5 group cursor-pointer bg-white p-3 rounded-[30px] shadow-sm hover:shadow-md transition-all">
             <img 
               src={tour.imageUrl?.startsWith('http') ? tour.imageUrl : `${tour.imageUrl}`} 
               className="w-24 h-24 rounded-[22px] object-cover" 

@@ -1,82 +1,141 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    setUserMenuOpen(false);
+    setMobileMenuOpen(false);
+    navigate('/');
   };
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4">
-      <nav className="mt-2 w-full max-w-[420px] bg-white/80 backdrop-blur-lg border border-gray-100 px-6 py-3 flex justify-between items-center shadow-xl rounded-2xl">
-        
-        {/* 左側：返回鍵與標題 */}
-        <div className="flex items-center">
-          {location.pathname !== '/' && (
-            <button 
-              onClick={() => navigate(-1)} 
-              className="mr-3 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 lg:h-20">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-5 h-5">
+                <path fillRule="evenodd" d="m11.54 22.351.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
-            </button>
-          )}
-          <Link to="/" className="flex flex-col">
-            <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest leading-none mb-1">Explore Australia</span>
-            <span className="text-lg font-black text-slate-800 leading-none">Welcome</span>
+            </div>
+            <span className="text-xl font-bold text-gray-900 hidden sm:block">Explore Australia</span>
           </Link>
-        </div>
-        
-        {/* 右側按鈕群 */}
-        <div className="flex items-center space-x-3">
-          {user ? (
-            <>
-              {/* 🏠 新增的小房子按鈕 (Home) */}
-              <Link 
-                to="/" 
-                title="Home"
-                className={`p-2 rounded-xl transition-all ${
-                  location.pathname === '/' 
-                  ? 'bg-emerald-50 text-emerald-600' 
-                  : 'text-gray-400 hover:bg-gray-50'
-                }`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-              </Link>
 
-              {/* 登出按鈕 */}
-              <button
-                onClick={handleLogout}
-                className="text-[10px] font-black text-slate-400 border border-slate-100 px-2.5 py-2 rounded-xl uppercase hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all"
-              >
-                Logout
-              </button>
+          {/* Desktop right section */}
+          <div className="hidden md:flex items-center gap-3">
+            {user ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 border border-gray-200 rounded-full py-1.5 pl-3 pr-1.5 hover:shadow-md transition-shadow"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-gray-500">
+                    <path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z" clipRule="evenodd" />
+                  </svg>
+                  <div className="w-8 h-8 bg-brand-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    {user.username?.substring(0, 2).toUpperCase()}
+                  </div>
+                </button>
 
-              {/* 使用者頭像 */}
-              <div className="w-9 h-9 bg-emerald-500 rounded-full border-2 border-white shadow-md overflow-hidden flex items-center justify-center text-white font-black text-xs">
-                {user.username?.substring(0, 2).toUpperCase()}
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">{user.username}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    {user.role === 'admin' ? (
+                      <Link to="/admin" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Admin Dashboard</Link>
+                    ) : (
+                      <>
+                        <Link to="/my-bookings" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">My Bookings</Link>
+                        <Link to="/dashboard" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Dashboard</Link>
+                      </>
+                    )}
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button onClick={handleLogout} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Log out</button>
+                    </div>
+                  </div>
+                )}
               </div>
-            </>
-          ) : (
-            /* 未登入狀態 */
-            <Link 
-              to={location.pathname === '/login' ? '/register' : '/login'} 
-              className="px-5 py-2.5 bg-emerald-500 text-white text-xs font-black rounded-xl shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all uppercase tracking-tight"
-            >
-              {location.pathname === '/login' ? 'Sign Up' : 'Sign In'}
-            </Link>
-          )}
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-semibold text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  Sign In
+                </Link>
+                <Link to="/register" className="text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 px-5 py-2.5 rounded-lg transition-colors">
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-50"
+          >
+            {mobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6.75zM3 12a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm0 5.25a.75.75 0 01.75-.75h16.5a.75.75 0 010 1.5H3.75a.75.75 0 01-.75-.75z" clipRule="evenodd" />
+              </svg>
+            )}
+          </button>
         </div>
-      </nav>
-    </div>
+      </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-100 bg-white">
+          <div className="px-4 py-4 space-y-2">
+            {user ? (
+              <>
+                <div className="px-3 py-2 mb-2">
+                  <p className="text-sm font-semibold text-gray-900">{user.username}</p>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                </div>
+                {user.role === 'admin' ? (
+                  <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Admin Dashboard</Link>
+                ) : (
+                  <>
+                    <Link to="/my-bookings" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">My Bookings</Link>
+                    <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Dashboard</Link>
+                  </>
+                )}
+                <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Log out</button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg">Sign In</Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg text-center">Register</Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
   );
 };
 

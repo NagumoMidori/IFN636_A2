@@ -95,7 +95,7 @@ const TourDetail = () => {
           <div className="flex flex-col space-y-3">
             {/* Admin 看到 Edit 和 Remove */}
             <button 
-              onClick={() => navigate(`/edit-tour/${tour._id}`)} 
+              onClick={() => navigate(`/admin/tours/${tour._id}/edit`)} 
               className="w-full bg-[#4C4DDC] text-white font-black py-4 rounded-2xl shadow-lg uppercase tracking-widest text-[11px] active:scale-95 transition-all"
             >
               Edit Tour Package

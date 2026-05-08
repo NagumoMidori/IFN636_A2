@@ -71,7 +71,7 @@ const EditTour = () => {
 
       await axiosInstance.put(`/api/tours/${id}`, data);
       alert('Update Successful!');
-      navigate(`/tour/${id}`);
+      navigate(`/tours/${id}`);
     } catch (err) {
       alert(`Update failed: ${err.response?.data?.message || 'Error'}`);
     }
