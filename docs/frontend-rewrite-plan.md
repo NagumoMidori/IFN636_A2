@@ -26,24 +26,28 @@
 
 ---
 
-## Phase 2 — B 端 Admin 页面 🔄 IN PROGRESS
+## Phase 2 — B 端 Admin 页面 ✅ DONE
 
 | 页面 | 路由 | 状态 |
 |------|------|------|
 | Admin Dashboard（统计卡片 + 表格） | `/admin` | ✅ |
 | AdminLayout 侧边栏导航 | `/admin/*` | ✅ |
-| Tour 列表页（全部 tour 表格） | `/admin/tours` | ⬜ 待做 |
-| 添加新 Tour 表单 | `/admin/tours/new` | ⬜ 待做（路由需从 `/admin/tours` 改到这里） |
-| 编辑 Tour 表单 | `/admin/tours/:id/edit` | ⬜ 待做（重写样式） |
-| 订单列表页 | `/admin/orders` | ⬜ 待做（重写样式） |
+| Tour 列表页（全部 tour 表格） | `/admin/tours` | ✅ |
+| 添加新 Tour 表单 | `/admin/tours/new` | ✅ |
+| 编辑 Tour 表单 | `/admin/tours/:id/edit` | ✅ |
+| 订单列表页 | `/admin/orders` | ✅ |
+| 订单详情页（新增） | `/admin/orders/:id` | ✅ |
 
-**路由调整（待实施）：**
-- `/admin/tours` 从"添加 tour"改为"tour 列表"
-- 新增 `/admin/tours/new` 作为"添加 tour"入口
+**Phase 2 完成事项：**
+- 路由调整：`/admin/tours` 改为 tour 列表，`/admin/tours/new` 为添加入口
+- 订单状态三色统一：Confirmed（绿）/ Pending（琥珀）/ Cancelled（红）
+- 所有表格统一 `table-fixed` + `colgroup` 对齐
+- 表单统一 `max-w-5xl`，zinc-50 输入框 + emerald focus ring
+- 新增订单详情页（AdminOrderDetail），表格行可点击查看
 
 ---
 
-## Phase 3 — C 端剩余页面 ⬜ NOT STARTED
+## Phase 3 — C 端剩余页面 🔄 待重新设计
 
 | 页面 | 路由 | 状态 |
 |------|------|------|

@@ -14,7 +14,8 @@ const AdminOrders = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const confirmed = bookings.filter((b) => b.status !== 'Cancelled').length;
+  const confirmed = bookings.filter((b) => b.status === 'Confirmed').length;
+  const pending = bookings.filter((b) => !b.status || b.status === 'Pending').length;
   const cancelled = bookings.filter((b) => b.status === 'Cancelled').length;
 
   if (loading) {
@@ -40,7 +41,7 @@ const AdminOrders = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500">Total Orders</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{bookings.length}</p>
@@ -48,6 +49,10 @@ const AdminOrders = () => {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500">Confirmed</p>
           <p className="text-2xl font-bold text-green-700 mt-1">{confirmed}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <p className="text-sm text-gray-500">Pending</p>
+          <p className="text-2xl font-bold text-amber-700 mt-1">{pending}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500">Cancelled</p>
@@ -111,9 +116,11 @@ const AdminOrders = () => {
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       booking.status === 'Cancelled'
                         ? 'bg-red-50 text-red-700'
-                        : 'bg-green-50 text-green-700'
+                        : booking.status === 'Confirmed'
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-amber-50 text-amber-700'
                     }`}>
-                      {booking.status || 'Confirmed'}
+                      {booking.status || 'Pending'}
                     </span>
                   </td>
                 </tr>
