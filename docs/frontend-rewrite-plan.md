@@ -61,6 +61,35 @@
 
 ---
 
+## Phase 3 设计决策
+
+### 用户流程（Meeting 确定）
+```
+首页 → Tour详情 → 加入购物车(选日期+人数) → 购物车 → 结算(预填联系信息) → 订单完成
+                                                                                ↓
+Tour详情底部 ← ← ← ← ← ← ← ← ← ← ← ← 添加评价(Review)
+```
+
+### 新增功能
+- **购物车（Cart）**：CRUD — 加入、查看、修改、删除。后端组员在做
+- **Review 评价**：展示在 Tour 详情页底部，需要新建后端接口
+- **用户资料更新**：PUT /api/users/profile，需要新建后端接口
+
+### 图片存储策略
+- **静态素材**（登录背景、logo）→ `frontend/public/`，跟随代码部署
+- **动态上传的 Tour 图片** → Cloudinary 云存储（后端已配置，controller 待切换）
+
+### 后端接口依赖
+
+| 接口 | 状态 | 负责人 |
+|------|------|------|
+| Cart CRUD（POST/GET/PUT/DELETE） | 组员开发中 | 组员 |
+| Review（POST/GET） | 未开始 | 待定 |
+| User Profile 更新（PUT） | 未开始 | 待定 |
+| Tour Controller 切换 Cloudinary | 未开始 | 待定 |
+
+---
+
 ## 待定事项
 
 | 事项 | 状态 | 备注 |
@@ -69,3 +98,16 @@
 | 设计图修复 | 未开始 | BDD 缺 Auth、CRUD 缺 Read、Use Case 错位 |
 | 新 MongoDB Atlas 实例 | 延后 | 当前用 A1 的 |
 | 搜索/筛选功能 | 延后 | 首页搜索栏目前是占位 |
+
+---
+
+## 设计模式要求（Meeting 确定）
+
+| 模式 | 应用场景 | 状态 |
+|------|------|------|
+| Factory | 待定 | ⬜ |
+| Singleton | 数据库连接 | ⬜ |
+| Observer | 购物车状态变化通知 | ⬜ |
+| Strategy | 待定 | ⬜ |
+| Facade | API 抽象层 | ⬜ |
+| MVC | 整体架构 | ✅ 已有 |
