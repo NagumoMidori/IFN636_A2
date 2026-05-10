@@ -16,9 +16,11 @@ import CancelBooking from './pages/CancelBooking';
 import UserHome from './pages/UserHome';
 
 import AdminHome from './pages/AdminHome';
+import TourList from './pages/TourList';
 import ManageTours from './pages/ManageTours';
 import EditTour from './pages/EditTour';
 import AdminOrders from './pages/AdminOrders';
+import AdminOrderDetail from './pages/AdminOrderDetail';
 
 function App() {
   return (
@@ -46,9 +48,11 @@ function App() {
         {/* B-end: Admin Layout */}
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminHome /></ProtectedRoute>} />
-          <Route path="/admin/tours" element={<ProtectedRoute requiredRole="admin"><ManageTours /></ProtectedRoute>} />
+          <Route path="/admin/tours" element={<ProtectedRoute requiredRole="admin"><TourList /></ProtectedRoute>} />
+          <Route path="/admin/tours/new" element={<ProtectedRoute requiredRole="admin"><ManageTours /></ProtectedRoute>} />
           <Route path="/admin/tours/:id/edit" element={<ProtectedRoute requiredRole="admin"><EditTour /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute requiredRole="admin"><AdminOrders /></ProtectedRoute>} />
+          <Route path="/admin/orders/:id" element={<ProtectedRoute requiredRole="admin"><AdminOrderDetail /></ProtectedRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

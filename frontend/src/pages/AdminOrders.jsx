@@ -3,63 +3,129 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 
 const AdminOrders = () => {
-  const [bookings, setBookings] = useState([]);
   const navigate = useNavigate();
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axiosInstance.get('/api/bookings/all')
-      .then(res => setBookings(res.data))
-      .catch(err => console.error(err));
+      .then((res) => setBookings(res.data))
+      .catch((err) => console.error('Failed to fetch orders:', err))
+      .finally(() => setLoading(false));
   }, []);
 
+  const confirmed = bookings.filter((b) => b.status !== 'Cancelled').length;
+  const cancelled = bookings.filter((b) => b.status === 'Cancelled').length;
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-48" />
+          <div className="grid grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => <div key={i} className="h-20 bg-gray-200 rounded-xl" />)}
+          </div>
+          <div className="h-96 bg-gray-200 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-[420px] mx-auto bg-white min-h-screen font-sans">
+    <div className="p-8">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 pt-12 border-b border-gray-50">
-        <button onClick={() => navigate('/')} className="text-xl">←</button>
-        <h1 className="text-xl font-black text-slate-800">Order</h1>
-        <button onClick={() => navigate('/')} className="text-xl">🏠</button>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+        <p className="text-sm text-gray-500 mt-1">{bookings.length} orders total</p>
       </div>
 
-      <div className="p-6 space-y-8">
-        {/* 訂單列表 (這裡可以做分組，或者直接列出) */}
-        {bookings.length === 0 ? (
-          <p className="text-center text-gray-300 font-bold py-20">NO ORDERS YET</p>
-        ) : (
-          bookings.map((booking) => (
-            <div key={booking._id} className="mb-6">
-              {/* 使用者名稱小標題 */}
-              <p className="text-[11px] font-black text-slate-800 uppercase tracking-widest mb-3">
-                Name : {booking.personalInfo?.fullName || booking.user?.username}
-              </p>
-              
-              {/* 訂單卡片 */}
-              <div 
-                onClick={() => navigate(`/admin/order-detail/${booking._id}`)}
-                className="flex items-center space-x-4 bg-white p-4 rounded-[28px] border border-gray-100 shadow-sm active:scale-95 transition-all"
-              >
-                <img 
-                  src={booking.tour?.imageUrl?.startsWith('http') ? booking.tour.imageUrl : `${booking.tour?.imageUrl}`} 
-                  className="w-14 h-14 rounded-xl object-cover" 
-                  alt="" 
-                />
-                <div className="flex-1">
-                  <h4 className="font-black text-slate-800 text-[11px] leading-tight mb-1">{booking.tour?.title}</h4>
-                  <p className="text-gray-400 text-[9px] font-bold uppercase">{new Date(booking.tourDate).toLocaleDateString()}</p>
-                </div>
-                
-                {/* 狀態標籤 (依照 Figma) */}
-                <span className={`text-[8px] font-black px-2 py-1 rounded-full uppercase ${
-                   booking.status === 'Cancelled' 
-                   ? 'bg-red-50 text-red-500' 
-                   : 'bg-green-50 text-green-500'
-                }`}>
-                  {booking.status === 'Cancelled' ? 'Cancel' : 'Confirm'}
-                </span>
-              </div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <p className="text-sm text-gray-500">Total Orders</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{bookings.length}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <p className="text-sm text-gray-500">Confirmed</p>
+          <p className="text-2xl font-bold text-green-700 mt-1">{confirmed}</p>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <p className="text-sm text-gray-500">Cancelled</p>
+          <p className="text-2xl font-bold text-red-700 mt-1">{cancelled}</p>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left table-fixed">
+            <colgroup>
+              <col className="w-[22%]" />
+              <col className="w-[22%]" />
+              <col className="w-[16%]" />
+              <col className="w-[12%]" />
+              <col className="w-[14%]" />
+              <col className="w-[14%]" />
+            </colgroup>
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Tour</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Guests</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {bookings.map((booking) => (
+                <tr key={booking._id} onClick={() => navigate(`/admin/orders/${booking._id}`)} className="hover:bg-gray-50 transition-colors cursor-pointer">
+                  <td className="px-6 py-5 text-sm font-medium text-gray-900">
+                    {booking.contactName || booking.personalInfo?.fullName || booking.user?.username || 'N/A'}
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={booking.tour?.imageUrl?.startsWith('http') ? booking.tour.imageUrl : `http://localhost:5001${booking.tour?.imageUrl}`}
+                        alt={booking.tour?.title}
+                        className="w-10 h-10 rounded-lg object-cover bg-gray-100"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop'; }}
+                      />
+                      <span className="text-sm text-gray-700 truncate">{booking.tour?.title || 'N/A'}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5 text-sm text-gray-500">
+                    {booking.selectedDate
+                      ? new Date(booking.selectedDate).toLocaleDateString()
+                      : booking.tourDate
+                        ? new Date(booking.tourDate).toLocaleDateString()
+                        : 'N/A'}
+                  </td>
+                  <td className="px-6 py-5 text-sm text-gray-500">
+                    {booking.quantity || booking.guests || '—'}
+                  </td>
+                  <td className="px-6 py-5 text-sm font-medium text-gray-900">
+                    AUD ${booking.totalPrice || 0}
+                  </td>
+                  <td className="px-6 py-5">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      booking.status === 'Cancelled'
+                        ? 'bg-red-50 text-red-700'
+                        : 'bg-green-50 text-green-700'
+                    }`}>
+                      {booking.status || 'Confirmed'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {bookings.length === 0 && (
+            <div className="text-center py-16 text-sm text-gray-400">
+              No orders yet.
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

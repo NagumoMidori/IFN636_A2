@@ -38,10 +38,6 @@ MVC pattern
 
 
 
-
-
-
-
 # workflow
 
 
@@ -53,6 +49,30 @@ new user ---> Homepage ----> login/register -------> see details/add to cart ---
 
 
 Admin -----> Homepage -------> login -------> dashboard -----> management/actions
+
+
+
+
+
+# CRUD
+
+## User
+
+login -- R
+
+Register--C
+
+Update user info , email, name, phone number
+
+## Cart
+
+add to cart
+
+remove from cart
+
+update the info of tour in cart
+
+read all the tours in cart
 
 
 

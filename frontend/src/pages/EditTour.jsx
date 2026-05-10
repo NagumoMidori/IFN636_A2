@@ -7,8 +7,9 @@ const EditTour = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
-  // 🔴 確保所有 Figma 欄位都有初始值
   const [formData, setFormData] = useState({
     title: '',
     location: '',
@@ -20,10 +21,9 @@ const EditTour = () => {
     price: '',
     discount: '',
     status: 'Available',
-    imageFile: null
+    imageFile: null,
   });
 
-  // 1. 初始化：抓取現有資料
   useEffect(() => {
     const fetchTour = async () => {
       try {
@@ -40,13 +40,15 @@ const EditTour = () => {
           price: data.price || '',
           discount: data.discount || '',
           status: data.status || 'Available',
-          imageFile: null
+          imageFile: null,
         });
         if (data.imageUrl) {
-          setPreview(data.imageUrl.startsWith('http') ? data.imageUrl : `${data.imageUrl}`);
+          setPreview(data.imageUrl.startsWith('http') ? data.imageUrl : `http://localhost:5001${data.imageUrl}`);
         }
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error('Fetch error:', err);
+      } finally {
+        setFetching(false);
       }
     };
     fetchTour();
@@ -56,12 +58,12 @@ const EditTour = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 2. 提交更新
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const data = new FormData();
-      Object.keys(formData).forEach(key => {
+      Object.keys(formData).forEach((key) => {
         if (key === 'imageFile') {
           if (formData[key] instanceof File) data.append('imageFile', formData[key]);
         } else {
@@ -70,143 +72,178 @@ const EditTour = () => {
       });
 
       await axiosInstance.put(`/api/tours/${id}`, data);
-      alert('Update Successful!');
-      navigate(`/tours/${id}`);
+      navigate('/admin/tours');
     } catch (err) {
       alert(`Update failed: ${err.response?.data?.message || 'Error'}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const labelStyle = "text-[11px] font-bold text-gray-500 mb-2 block";
-  const inputStyle = "w-full bg-white border border-gray-200 p-3 rounded-lg outline-none text-sm font-medium text-slate-700 focus:border-green-500 transition-all";
+  const labelStyle = 'block text-sm font-medium text-gray-700 mb-1.5';
+  const inputStyle = 'w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm text-gray-900';
+
+  if (fetching) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-48" />
+          <div className="h-[600px] bg-gray-200 rounded-xl max-w-3xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-[420px] mx-auto bg-white min-h-screen pb-40 font-sans border-x border-gray-100">
+    <div className="p-8">
       {/* Header */}
-      <div className="sticky top-0 bg-white z-50 px-6 py-6 flex items-center justify-between border-b border-gray-50">
-        <button onClick={() => navigate(-1)} className="text-xl">←</button>
-        <h1 className="text-md font-black tracking-tight text-slate-800">Edit Tour Package</h1>
-        <button onClick={() => navigate('/')} className="text-xl">🏠</button>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Tour</h1>
+          <p className="text-sm text-gray-500 mt-1">Update the details for this tour package</p>
+        </div>
+        <button
+          onClick={() => navigate('/admin/tours')}
+          className="text-sm font-medium text-red-500 hover:text-white hover:bg-red-500 border border-red-300 px-4 py-2 rounded-lg transition-colors"
+        >
+          Cancel
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="px-6 space-y-6 pt-6">
-        {/* Title & Location */}
-        <div>
-          <label className={labelStyle}>Tour Title</label>
-          <input type="text" name="title" value={formData.title} onChange={handleChange} className={inputStyle} />
-        </div>
-
-        <div>
-          <label className={labelStyle}>Location</label>
-          <input type="text" name="location" value={formData.location} onChange={handleChange} className={inputStyle} />
-        </div>
-
-        {/* Date Selection */}
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <label className={labelStyle}>Start Date</label>
-            <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className={inputStyle} />
+      {/* Form Card */}
+      <div className="bg-white rounded-xl border border-gray-200 p-8 max-w-5xl">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Title & Location */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className={labelStyle}>Tour Title</label>
+              <input type="text" name="title" value={formData.title} onChange={handleChange} className={inputStyle} required />
+            </div>
+            <div>
+              <label className={labelStyle}>Location</label>
+              <input type="text" name="location" value={formData.location} onChange={handleChange} className={inputStyle} required />
+            </div>
           </div>
-          <div className="flex-1">
-            <label className={labelStyle}>End Date</label>
-            <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} className={inputStyle} />
+
+          {/* Dates */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className={labelStyle}>Start Date</label>
+              <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} className={inputStyle} />
+            </div>
+            <div>
+              <label className={labelStyle}>End Date</label>
+              <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} className={inputStyle} />
+            </div>
           </div>
-        </div>
 
-        {/* Description */}
-        <div>
-          <label className={labelStyle}>What is it about</label>
-          <textarea 
-            name="description" 
-            rows="8" 
-            value={formData.description} 
-            onChange={handleChange} 
-            className={`${inputStyle} resize-none leading-relaxed text-xs`}
-          />
-        </div>
+          {/* Description */}
+          <div>
+            <label className={labelStyle}>Description</label>
+            <textarea
+              name="description"
+              rows="5"
+              value={formData.description}
+              onChange={handleChange}
+              className={`${inputStyle} resize-none`}
+            />
+          </div>
 
-        {/* Important Notes */}
-        <div>
-          <label className={labelStyle}>Important Notes:</label>
-          <textarea 
-            name="notes" 
-            rows="5" 
-            value={formData.notes} 
-            onChange={handleChange} 
-            className={`${inputStyle} resize-none text-xs`}
-          />
-        </div>
+          {/* Notes */}
+          <div>
+            <label className={labelStyle}>Important Notes</label>
+            <textarea
+              name="notes"
+              rows="3"
+              value={formData.notes}
+              onChange={handleChange}
+              className={`${inputStyle} resize-none`}
+            />
+          </div>
 
-        {/* Upload Section */}
-        <div>
-          <label className={labelStyle}>Edit cover picture</label>
-          <div 
-            onClick={() => fileInputRef.current.click()} 
-            className="w-full h-32 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all overflow-hidden"
-          >
-            {preview ? (
-              <img src={preview} className="w-full h-full object-cover" alt="Preview" />
-            ) : (
-              <div className="text-center text-gray-400">
-                <p className="text-[10px] font-bold">No Image Selected</p>
+          {/* Image Upload */}
+          <div>
+            <label className={labelStyle}>Cover Image</label>
+            <div
+              onClick={() => fileInputRef.current.click()}
+              className="w-full h-40 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all overflow-hidden"
+            >
+              {preview ? (
+                <img src={preview} className="w-full h-full object-cover" alt="Preview" />
+              ) : (
+                <div className="text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-8 h-8 text-gray-300 mx-auto mb-2">
+                    <path fillRule="evenodd" d="M1 5.25A2.25 2.25 0 013.25 3h13.5A2.25 2.25 0 0119 5.25v9.5A2.25 2.25 0 0116.75 17H3.25A2.25 2.25 0 011 14.75v-9.5zm1.5 5.81V14.75c0 .414.336.75.75.75h13.5a.75.75 0 00.75-.75v-2.06l-2.22-2.22a.75.75 0 00-1.06 0L9.06 15H3.25a.75.75 0 01-.75-.75v-3.19zM12 7a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm font-medium text-gray-500">Click to upload</p>
+                  <p className="text-xs text-gray-400 mt-1">PNG, JPG or WebP</p>
+                </div>
+              )}
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setPreview(URL.createObjectURL(file));
+                  setFormData({ ...formData, imageFile: file });
+                }
+              }}
+            />
+          </div>
+
+          {/* Capacity, Price, Discount */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div>
+              <label className={labelStyle}>Capacity / day</label>
+              <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} className={inputStyle} />
+            </div>
+            <div>
+              <label className={labelStyle}>Price (AUD)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                <input type="number" name="price" value={formData.price} onChange={handleChange} className={`${inputStyle} pl-8`} required />
               </div>
-            )}
-          </div>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            className="hidden" 
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (file) {
-                setPreview(URL.createObjectURL(file));
-                setFormData({ ...formData, imageFile: file });
-              }
-            }} 
-          />
-        </div>
-
-        {/* Capacity, Price, Discount */}
-        <div>
-          <label className={labelStyle}>Capacity (/day)</label>
-          <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} className={inputStyle} />
-        </div>
-
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <label className={labelStyle}>Price (in AUD)</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-              <input type="number" name="price" value={formData.price} onChange={handleChange} className={`${inputStyle} pl-6`} />
+            </div>
+            <div>
+              <label className={labelStyle}>Discount (AUD)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                <input type="number" name="discount" value={formData.discount} onChange={handleChange} className={`${inputStyle} pl-8`} />
+              </div>
             </div>
           </div>
-          <div className="flex-1">
-            <label className={labelStyle}>Discount</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-              <input type="number" name="discount" value={formData.discount} onChange={handleChange} className={`${inputStyle} pl-6`} />
-            </div>
+
+          {/* Status */}
+          <div className="max-w-xs">
+            <label className={labelStyle}>Status</label>
+            <select name="status" value={formData.status} onChange={handleChange} className={inputStyle}>
+              <option value="Available">Available</option>
+              <option value="Unavailable">Unavailable</option>
+            </select>
           </div>
-        </div>
 
-        {/* Status Selector */}
-        <div>
-          <label className={labelStyle}>Status</label>
-          <select name="status" value={formData.status} onChange={handleChange} className={inputStyle}>
-            <option value="Available">Available</option>
-            <option value="Unavailable">Unavailable</option>
-          </select>
-        </div>
-      </form>
-
-      {/* Fixed Submit Button */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] p-6 bg-white border-t border-gray-50">
-        <button 
-          onClick={handleSubmit}
-          className="w-full bg-[#4C4DDC] text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all"
-        >
-          Save Changes
-        </button>
+          {/* Submit */}
+          <div className="pt-4 border-t border-gray-100 flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            >
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/tours')}
+              className="text-sm font-medium text-gray-500 hover:text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

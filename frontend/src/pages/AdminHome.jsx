@@ -105,7 +105,7 @@ const AdminHome = () => {
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-base font-semibold text-gray-900">Tours</h2>
           <button
-            onClick={() => navigate('/admin/tours')}
+            onClick={() => navigate('/admin/tours/new')}
             className="text-sm font-medium text-brand-600 hover:text-brand-700"
           >
             + Add Tour
