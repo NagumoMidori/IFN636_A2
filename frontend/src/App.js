@@ -8,7 +8,7 @@ import Homepage from './pages/Homepage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import TourDetail from './pages/TourDetail';
-import BookTour from './pages/BookTour';
+import Cart from './pages/Cart';
 import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
 import EditBooking from './pages/EditBooking';
@@ -37,7 +37,7 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/tours/:id" element={<TourDetail />} />
 
-          <Route path="/book-tour/:id" element={<ProtectedRoute><BookTour /></ProtectedRoute>} />
+          <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/edit-booking/:id" element={<ProtectedRoute><EditBooking /></ProtectedRoute>} />

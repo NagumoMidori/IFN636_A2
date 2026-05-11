@@ -1,77 +1,168 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
+import { getCartCount, getImageUrl, subscribeToCartUpdates } from '../utils/cartStorage';
+
+const formatDate = (value) => {
+  if (!value) return 'Date not set';
+  return new Date(value).toLocaleDateString('en-AU', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
+const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')}`;
 
 const UserHome = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tours, setTours] = useState([]);
-  const [bookingCount, setBookingCount] = useState(0);
+  const [bookings, setBookings] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axiosInstance.get('/api/tours').then(res => setTours(res.data));
-    if (user) {
-      axiosInstance.get('/api/bookings/my-bookings')
-        .then(res => setBookingCount(res.data.length))
-        .catch(err => console.error(err));
-    }
-  }, [user]);
+    const fetchDashboard = async () => {
+      setLoading(true);
+
+      try {
+        const [toursResponse, bookingsResponse] = await Promise.all([
+          axiosInstance.get('/api/tours'),
+          axiosInstance.get('/api/bookings/my-bookings'),
+        ]);
+        setTours(toursResponse.data);
+        setBookings(bookingsResponse.data);
+      } catch (err) {
+        console.error('Failed to load dashboard:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  useEffect(() => {
+    const updateCartCount = () => setCartCount(getCartCount());
+    updateCartCount();
+    return subscribeToCartUpdates(updateCartCount);
+  }, []);
+
+  const recentBookings = useMemo(() => bookings.slice(0, 3), [bookings]);
+  const recommendedTours = useMemo(() => tours.slice(0, 4), [tours]);
 
   return (
-    <div className="max-w-[420px] mx-auto bg-[#FBFBFB] min-h-screen pt-24 pb-20 px-6 font-sans">
-      {/* 1. 問候區 (移除了重複的 Logo) */}
-      <div className="mb-8">
-        <h2 className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-1">Good Morning!</h2>
-        <h1 className="text-3xl font-black text-slate-800 tracking-tighter flex items-center">
-          Hello, {user?.username} <span className="ml-2">👋</span>
-        </h1>
-      </div>
-
-      {/* 2. 我的訂單卡片 */}
-      <div 
-        onClick={() => navigate('/my-bookings')}
-        className="bg-white p-6 rounded-[35px] shadow-sm flex items-center justify-between mb-8 border border-white cursor-pointer active:scale-95 transition-all"
-      >
-        <div className="flex items-center space-x-4">
-          <div className="bg-blue-50 w-12 h-12 rounded-2xl flex items-center justify-center text-lg">📋</div>
-          <div>
-            <p className="text-gray-400 text-[9px] font-black uppercase tracking-widest">My Current Bookings</p>
-            <p className="text-2xl font-black text-slate-800">{bookingCount}</p>
-          </div>
-        </div>
-        <div className="text-blue-500 font-bold text-[10px] uppercase tracking-tighter">View All →</div>
-      </div>
-
-      {/* 3. 搜尋列 (Figma 風格) */}
-      <div className="relative mb-10">
-        <input 
-          type="text" 
-          placeholder="Where do you want to go?" 
-          className="w-full bg-white border border-gray-100 p-5 rounded-[22px] shadow-sm outline-none pl-14 text-sm font-medium"
-        />
-        <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300">🔍</span>
-      </div>
-
-      {/* 4. 行程列表 */}
-      <h3 className="font-black text-slate-800 text-lg mb-6 tracking-tight">Recent Popular Tour</h3>
-      <div className="space-y-6">
-        {tours.map(tour => (
-          <div key={tour._id} onClick={() => navigate(`/tours/${tour._id}`)} className="flex items-center space-x-5 group cursor-pointer bg-white p-3 rounded-[30px] shadow-sm hover:shadow-md transition-all">
-            <img 
-              src={tour.imageUrl?.startsWith('http') ? tour.imageUrl : `${tour.imageUrl}`} 
-              className="w-24 h-24 rounded-[22px] object-cover" 
-              alt={tour.title}
-            />
-            <div className="flex-1">
-              <h4 className="font-black text-slate-800 text-sm mb-1">{tour.title}</h4>
-              <p className="text-gray-400 text-[10px] font-bold mb-3">📍 {tour.location}</p>
-              <div className="bg-[#ADFF2F] inline-block px-3 py-1 rounded-lg text-[10px] font-black text-[#004D25]">AUD {tour.price}</div>
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <div className="mb-8 rounded-3xl bg-gray-900 px-6 py-8 text-white sm:px-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-brand-300">Account overview</p>
+              <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Welcome back, {user?.username}</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">
+                Review your cart, manage bookings, and keep exploring Australian tour packages from one place.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/cart" className="rounded-lg bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-100">
+                View cart
+              </Link>
+              <Link to="/my-bookings" className="rounded-lg border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10">
+                My bookings
+              </Link>
             </div>
           </div>
-        ))}
+        </div>
+
+        <div className="mb-10 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Cart guests</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{cartCount}</p>
+          </div>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Bookings</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{bookings.length}</p>
+          </div>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-sm text-gray-500">Available tours</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{tours.length}</p>
+          </div>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+          <div>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-gray-900">Recommended tours</h2>
+              <Link to="/" className="text-sm font-semibold text-gray-700 hover:text-gray-900">
+                View all
+              </Link>
+            </div>
+
+            {loading ? (
+              <div className="grid gap-5 sm:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="h-72 animate-pulse rounded-2xl bg-gray-100" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-5 sm:grid-cols-2">
+                {recommendedTours.map((tour) => (
+                  <article
+                    key={tour._id}
+                    onClick={() => navigate(`/tours/${tour._id}`)}
+                    className="group cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+                  >
+                    <img
+                      src={getImageUrl(tour.imageUrl)}
+                      alt={tour.title}
+                      className="aspect-[4/3] w-full rounded-xl object-cover"
+                      onError={(event) => {
+                        event.currentTarget.src = '/images/bondi_beach.jpg';
+                      }}
+                    />
+                    <h3 className="mt-4 truncate text-lg font-semibold text-gray-900 group-hover:underline">{tour.title}</h3>
+                    <p className="mt-1 text-sm text-gray-500">{tour.location}</p>
+                    <p className="mt-3 text-sm font-semibold text-gray-900">{formatPrice(tour.price)} per person</p>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <aside className="h-fit rounded-2xl border border-gray-200 bg-white p-6 shadow-sm lg:sticky lg:top-28">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Recent bookings</h2>
+              <Link to="/my-bookings" className="text-sm font-semibold text-gray-700 hover:text-gray-900">
+                Manage
+              </Link>
+            </div>
+
+            {recentBookings.length === 0 ? (
+              <div className="mt-6 rounded-xl bg-gray-50 p-5 text-sm leading-6 text-gray-500">
+                No bookings yet. Add tours to cart and checkout to begin your trip plan.
+              </div>
+            ) : (
+              <div className="mt-5 space-y-4">
+                {recentBookings.map((booking) => (
+                  <button
+                    key={booking._id}
+                    type="button"
+                    onClick={() => navigate('/my-bookings')}
+                    className="block w-full rounded-xl border border-gray-100 p-4 text-left hover:bg-gray-50"
+                  >
+                    <p className="truncate text-sm font-semibold text-gray-900">{booking.tour?.title || 'Unknown tour'}</p>
+                    <p className="mt-1 text-xs text-gray-500">{formatDate(booking.tourDate)}</p>
+                    <p className="mt-2 text-sm font-semibold text-gray-900">{formatPrice(booking.totalPrice)}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </aside>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 
