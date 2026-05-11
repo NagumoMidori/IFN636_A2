@@ -24,9 +24,9 @@ export const CartProvider = ({ children }) => {
         try {
             const { data } = await axiosInstance.post('/api/cart/add', { tourId, quantity });
             setCart(data);
-            alert("已加入購物車！");
+            alert("Add to cart successfully!");
         } catch (error) {
-            alert(error.response?.data?.message || "加入失敗，請先登入");
+            alert(error.response?.data?.message || "Please login first");
         }
     };
 

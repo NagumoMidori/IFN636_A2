@@ -49,7 +49,7 @@ exports.addToCart = async (req, res) => {
     }
 };
 
-// 3. 從購物車刪除單一項目
+// 3. 從購物車刪除單一項目 Delete item from cart
 exports.removeFromCart = async (req, res) => {
     try {
         let cart = await Cart.findOne({ user: req.user.id }); 
