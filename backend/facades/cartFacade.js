@@ -54,6 +54,11 @@ class CartFacade {
         }
         return this.getCart(userId); // ensure the format after remove
     }
+
+    async clearCart(userId) {
+        await Cart.findOneAndDelete({ user: userId });
+        return { user: userId, items: [] };
+    }
 }
 
 module.exports = new CartFacade();

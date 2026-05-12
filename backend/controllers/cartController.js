@@ -32,3 +32,13 @@ exports.removeFromCart = async (req, res) => {
         res.status(500).json({ message: 'Deletion failed' });
     }
 };
+
+exports.clearCart = async (req, res) => {
+    try {
+        // call Facade clear cart logic
+        const emptyCart = await CartFacade.clearCart(req.user.id);
+        res.json(emptyCart);
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to empty cart' });
+    }
+};

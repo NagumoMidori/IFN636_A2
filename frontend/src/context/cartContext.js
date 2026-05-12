@@ -20,17 +20,25 @@ export const CartProvider = ({ children }) => {
     };
 
     // 2. 加入購物車 add to cart
-    const addToCart = async (tourId, quantity = 1) => {
-        try {
-            const { data } = await axiosInstance.post('/api/cart/add', { tourId, quantity });
+    const addToCart = async (tourId, quantity, tourDate, personalInfo) => {
+        try{    
+            const { data } = await axiosInstance.post('/api/cart/add', { 
+                tourId, quantity, tourDate, personalInfo 
+            });
             setCart(data);
             alert("Add to cart successfully!");
-        } catch (error) {
-            alert(error.response?.data?.message || "Please login first");
+        }
+        catch (error){
+            alert(error.response?.data?.message || "Please login first.");
         }
     };
+    // 3. update item
+    const updateCartItem = async (tourId, updates) => {
+        const { data } = await axiosInstance.post('/api/cart/add', { tourId, ...updates });
+        setCart(data);
+    };
 
-    // 3. 刪除項目 delete item
+    // 4. 刪除項目 delete item
     const removeFromCart = async (tourId) => {
         try {
             const { data } = await axiosInstance.delete(`/api/cart/${tourId}`);
@@ -40,12 +48,14 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    const clearCart = () => setCart({ items: [] });
+
     useEffect(() => {
         fetchCart();
     }, []);
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, loading }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateCartItem, clearCart, fetchCart }}>
             {children}
         </CartContext.Provider>
     );
