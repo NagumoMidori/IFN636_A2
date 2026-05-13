@@ -33,18 +33,31 @@ export const CartProvider = ({ children }) => {
         }
     };
     // 3. update item
-    const updateCartItem = async (tourId, updates) => {
-        const { data } = await axiosInstance.post('/api/cart/add', { tourId, ...updates });
-        setCart(data);
+    const updateCartItem = async (cartItemId, updates) => { // 參數改為 cartItemId
+        try {
+            const currentItem = cart.items.find(item => item._id === cartItemId);
+            if (!currentItem) return;
+
+            const { data } = await axiosInstance.patch('/api/cart/update', { 
+                cartItemId, 
+                quantity: updates.quantity !== undefined ? updates.quantity : currentItem.quantity,
+                tourDate: updates.tourDate || currentItem.tourDate,
+                personalInfo: updates.personalInfo || currentItem.personalInfo
+            });
+            
+            setCart(data);
+        } catch (error) {
+            console.error("Update failed", error);
+        }
     };
 
     // 4. 刪除項目 delete item
-    const removeFromCart = async (tourId) => {
+    const removeFromCart = async (cartItemId) => {
         try {
-            const { data } = await axiosInstance.delete(`/api/cart/${tourId}`);
+            const { data } = await axiosInstance.delete(`/api/cart/${cartItemId}`);
             setCart(data);
         } catch (error) {
-            console.error("Failed to delete item", error);
+            console.error("Delete failed", error);
         }
     };
 

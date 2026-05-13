@@ -14,7 +14,7 @@ class CartFacade {
         return CartFacade.formatResponse(cart, userId);
     }
 
-    async addToCart(userId, body) {
+    async addToCart(userId, body, isUpdate = false) {
         const { tourId, quantity, tourDate, personalInfo } = body;
 
         // validate information 
@@ -36,28 +36,54 @@ class CartFacade {
         );
 
         if (itemIndex > -1) {
-            cart.items[itemIndex].quantity += quantity;
-        } else {
+            if (isUpdate) {
+                cart.items[itemIndex].quantity = quantity; 
+            } else {
+                cart.items[itemIndex].quantity += quantity;
+            }
+
+            if (tourDate) cart.items[itemIndex].tourDate = tourDate;
+            if (personalInfo) cart.items[itemIndex].personalInfo = personalInfo;
+        } 
+        else {
             cart.items.push({ tour: tourId, quantity, tourDate, personalInfo });
         }
-
         await cart.save();
         return this.getCart(userId); // return populated information
     }
 
     // remove item
-    async removeItem(userId, tourId) {
+    async removeItem(userId, cartItemId) {
         let cart = await Cart.findOne({ user: userId });
         if (cart) {
-            cart.items = cart.items.filter(item => item.tour.toString() !== tourId);
+            cart.items = cart.items.filter(item => item._id.toString() !== cartItemId);
             await cart.save();
         }
-        return this.getCart(userId); // ensure the format after remove
+        return this.getCart(userId);
     }
 
     async clearCart(userId) {
         await Cart.findOneAndDelete({ user: userId });
         return { user: userId, items: [] };
+    }
+
+
+    async updateItem(userId, body) {
+        const { cartItemId, quantity, tourDate, personalInfo } = body;
+
+        const cart = await Cart.findOne({ user: userId });
+        if (!cart) throw new Error('NOT_FOUND');
+
+        const item = cart.items.id(cartItemId);
+        
+        if (item) {
+            if (quantity !== undefined) item.quantity = quantity;
+            if (tourDate) item.tourDate = tourDate;
+            if (personalInfo) item.personalInfo = personalInfo;
+            await cart.save();
+        }
+
+        return this.getCart(userId);
     }
 }
 

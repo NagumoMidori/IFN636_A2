@@ -24,14 +24,14 @@ const Cart = () => {
   );
 
   // call Context method to update backend information
-  const handleItemUpdate = (tourId, updates) => {
-    updateCartItem(tourId, updates);
+  const handleItemUpdate = (cartItemId, updates) => {
+    updateCartItem(cartItemId, updates);
   };
 
   // call Context method to delete item from database
-  const handleRemove = (tourId) => {
+  const handleRemove = (cartItemId) => {
     if (window.confirm('Are you sure to remove this trip?')) {
-      removeFromCart(tourId);
+      removeFromCart(cartItemId);
     }
   };
 
@@ -88,7 +88,7 @@ const Cart = () => {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-5">
             {items.map((item) => (
-              <article key={item.tour?._id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+              <article key={item._id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
                 <div className="grid gap-5 md:grid-cols-[180px_minmax(0,1fr)]">
                   <img
                     src={getImageUrl(item.tour?.imageUrl)}
@@ -105,10 +105,10 @@ const Cart = () => {
                       </div>
                       <button
                         type="button"
-                        onClick={() => handleRemove(item.tour?._id)}
+                        onClick={() => handleRemove(item._id)}
                         className="self-start rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
                       >
-                        移除
+                        remove
                       </button>
                     </div>
 
@@ -118,7 +118,7 @@ const Cart = () => {
                         <input
                           type="date"
                           value={item.tourDate || ''}
-                          onChange={(e) => handleItemUpdate(item.tour?._id, { tourDate: e.target.value })}
+                          onChange={(e) => handleItemUpdate(item._id, { tourDate: e.target.value })}
                           className="mt-2 w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
                         />
                       </label>
@@ -128,7 +128,7 @@ const Cart = () => {
                         <input
                           type="tel"
                           value={item.personalInfo?.phone || ''}
-                          onChange={(e) => handleItemUpdate(item.tour?._id, { 
+                          onChange={(e) => handleItemUpdate(item._id, { 
                             personalInfo: { ...item.personalInfo, phone: e.target.value } 
                           })}
                           placeholder="0412 345 678"
@@ -141,7 +141,7 @@ const Cart = () => {
                         <div className="mt-2 flex h-[42px] items-center justify-between rounded-lg border border-gray-200">
                           <button
                             type="button"
-                            onClick={() => handleItemUpdate(item.tour?._id, { quantity: Math.max(1, item.quantity - 1) })}
+                            onClick={() => handleItemUpdate(item._id, { quantity: Math.max(1, item.quantity - 1) })}
                             className="h-full w-11 text-lg font-semibold text-gray-700 hover:bg-gray-50"
                           >
                             -
@@ -149,7 +149,7 @@ const Cart = () => {
                           <span className="text-sm font-semibold text-gray-900">{item.quantity}</span>
                           <button
                             type="button"
-                            onClick={() => handleItemUpdate(item.tour?._id, { quantity: item.quantity + 1 })}
+                            onClick={() => handleItemUpdate(item._id, { quantity: item.quantity + 1 })}
                             className="h-full w-11 text-lg font-semibold text-gray-700 hover:bg-gray-50"
                           >
                             +

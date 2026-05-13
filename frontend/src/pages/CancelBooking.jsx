@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
-import { getImageUrl } from '../utils/cartStorage';
+import { getImageUrl } from '../utils/imageUtils';
 
 const formatDate = (value) => {
   if (!value) return 'Date not set';

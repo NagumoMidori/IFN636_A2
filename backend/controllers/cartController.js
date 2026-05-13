@@ -26,7 +26,7 @@ exports.addToCart = async (req, res) => {
 // remove item
 exports.removeFromCart = async (req, res) => {
     try {
-        const updatedCart = await CartFacade.removeItem(req.user.id, req.params.tourId);
+        const updatedCart = await CartFacade.removeItem(req.user.id, req.params.cartItemId);
         res.json(updatedCart);
     } catch (err) {
         res.status(500).json({ message: 'Deletion failed' });
@@ -40,5 +40,14 @@ exports.clearCart = async (req, res) => {
         res.json(emptyCart);
     } catch (err) {
         res.status(500).json({ message: 'Failed to empty cart' });
+    }
+};
+
+exports.updateCart = async (req, res) => {
+    try {
+        const updatedCart = await CartFacade.updateItem(req.user.id, req.body);
+        res.json(updatedCart);
+    } catch (err) {
+        res.status(400).json({ message: 'Update failed' });
     }
 };
