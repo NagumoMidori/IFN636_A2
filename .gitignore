@@ -151,5 +151,15 @@ frontend/build/
 # OS files
 .DS_Store
 
-# OMC
+# claude and AI tools
 .omc/
+.claude/
+.gpt/
+.llm/
+.llm/
+.llm/
+.llm/
+.llm/
+.llm/
+.llm/
+
