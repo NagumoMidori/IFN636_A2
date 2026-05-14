@@ -1,19 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { clearCart, getCartCount, subscribeToCartUpdates } from '../utils/cartStorage';
+/* import { clearCart, getCartCount, subscribeToCartUpdates } from '../utils/cartStorage'; */
+import { useCart } from '../context/cartContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { cart, clearCart } = useCart();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+  /* const [cartCount, setCartCount] = useState(0); */
   const userMenuRef = useRef(null);
 
   const handleLogout = () => {
     logout();
-    clearCart();
+    clearCart(); 
     setUserMenuOpen(false);
     setMobileMenuOpen(false);
     navigate('/');
@@ -29,11 +32,11 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
+/*   useEffect(() => {
     const updateCartCount = () => setCartCount(getCartCount());
     updateCartCount();
     return subscribeToCartUpdates(updateCartCount);
-  }, [user]);
+  }, [user]); */
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">

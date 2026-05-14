@@ -1,4 +1,8 @@
-export const CART_STORAGE_KEY = 'exploreAustraliaCart';
+// Annotate this part for checking cartFacade is working 2026/05/12
+
+
+
+/* export const CART_STORAGE_KEY = 'exploreAustraliaCart';
 export const CART_UPDATED_EVENT = 'exploreAustraliaCartUpdated';
 
 const isBrowser = () => typeof window !== 'undefined' && Boolean(window.localStorage);
@@ -89,3 +93,4 @@ export const subscribeToCartUpdates = (handler) => {
     window.removeEventListener('storage', handler);
   };
 };
+ */

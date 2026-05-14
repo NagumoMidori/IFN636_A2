@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
-import { addCartItem, getImageUrl } from '../utils/cartStorage';
+/* import { addCartItem, getImageUrl } from '../utils/cartStorage'; */
+import { useCart } from '../context/cartContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')}`;
 
@@ -10,12 +12,15 @@ const TourDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addToCart } = useCart();
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [tourDate, setTourDate] = useState('');
   const [phone, setPhone] = useState('');
+
+  
 
   useEffect(() => {
     const fetchTour = async () => {
@@ -54,7 +59,46 @@ const TourDetail = () => {
     }
   };
 
-  const handleAddToCart = () => {
+
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      alert('Please sign in before adding a tour to your cart.');
+      navigate('/login');
+      return;
+    }
+
+    if (user.role === 'admin') {
+      alert('Admin accounts cannot add tours to cart.');
+      return;
+    }
+
+    if (!tourDate) {
+      alert('Please select a tour date.');
+      return;
+    }
+
+    if (!phone.trim()) {
+      alert('Please enter your phone number.');
+      return;
+    }
+
+    try {
+      await addToCart(tour._id, quantity, tourDate, {
+        fullName: user.username,
+        email: user.email,
+        phone: phone.trim(),
+      });
+
+      // navigate to cart
+      navigate('/cart');
+    } catch (err) {
+      // handle backend 404 400 error
+      alert(err.response?.data?.message || 'Failed to add to cart. Please try again.');
+    }
+  };
+
+  /* const handleAddToCart = () => {
     if (!user) {
       alert('Please sign in before adding a tour to your cart.');
       navigate('/login');
@@ -92,7 +136,7 @@ const TourDetail = () => {
     });
 
     navigate('/cart');
-  };
+  }; */
 
   if (loading) {
     return (

@@ -4,6 +4,7 @@ import AuthLayout from './layouts/AuthLayout';
 import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
+import { CartProvider } from './context/cartContext';
 import Homepage from './pages/Homepage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -24,6 +25,7 @@ import AdminOrderDetail from './pages/AdminOrderDetail';
 
 function App() {
   return (
+    <CartProvider>
     <Router>
       <Routes>
         {/* Auth pages: no footer */}
@@ -58,6 +60,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
+    </CartProvider>
   );
 }
 
