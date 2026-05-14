@@ -35,7 +35,7 @@ exports.createTour = async (req, res) => {
         const tourData = {
             ...req.body,
             // 如果 Multer 有抓到檔案，儲存路徑；否則留空或用預設圖
-            imageUrl: req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl || ''
+            imageUrl: req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl || '../../../public/images/bondi_beach.webp'
         };
 
         const tour = new Tour(tourData);
