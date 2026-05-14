@@ -6,7 +6,7 @@ const User = require('../models/User');
 describe('Tour API & Booking System Tests', () => {
   let authToken;
   let cartItemId;
-  const sampleTourId = "Tour Id"; // Need to fill in real Tour Id
+  const sampleTourId = "6a05c123f42ecfa629809578"; // Need to fill in real Tour Id
   
   // Define testing account information
   const testUser = {
