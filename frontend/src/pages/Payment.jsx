@@ -10,7 +10,7 @@ const Payment = () => {
   const navigate = useNavigate();
   // From Context get cart information and clear method
   const { cart, clearCart } = useCart();
-  const items = cart?.items || [];
+  const items = useMemo(() => cart?.items || [], [cart?.items]);
   const [processing, setProcessing] = useState(false);
 
   const cartTotal = useMemo(
@@ -132,7 +132,7 @@ const Payment = () => {
             <h2 className="text-lg font-semibold text-gray-900">Booking Summary</h2>
             <div className="mt-5 space-y-4">
               {items.map((item) => (
-                <div key={item.tour?._id} className="flex gap-3 border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                <div key={item._id} className="flex gap-3 border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
                   <img
                     src={getImageUrl(item.tour?.imageUrl)}
                     alt={item.tour?.title}

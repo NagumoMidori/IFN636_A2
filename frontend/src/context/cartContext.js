@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useState(null);
+    const [cart, setCart] = useState({ items: [] });
     const [loading, setLoading] = useState(true);
 
     // 1. 從後端獲取購物車資料 get cart information from backend
@@ -35,11 +35,17 @@ export const CartProvider = ({ children }) => {
         }
     };
     // 3. update item
-    const updateCartItem = async (cartItemId, updates) => { // 參數改為 cartItemId
-        try {
-            const currentItem = cart.items.find(item => item._id === cartItemId);
-            if (!currentItem) return;
+    const updateCartItem = async (cartItemId, updates) => {
+        // ✅ 加入安全性檢查：確保 cart 存在且 items 是陣列
+        if (!cart || !Array.isArray(cart.items)) {
+            console.warn("Cart is not initialized yet.");
+            return;
+        }
 
+        const currentItem = cart.items.find(item => item._id === cartItemId);
+        if (!currentItem) return;
+
+        try {
             const { data } = await axiosInstance.patch('/api/cart/update', { 
                 cartItemId, 
                 quantity: updates.quantity !== undefined ? updates.quantity : currentItem.quantity,
@@ -78,10 +84,16 @@ export const CartProvider = ({ children }) => {
     }, [user]); 
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateCartItem, clearCart, fetchCart }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateCartItem, clearCart, fetchCart, loading }}>
             {children}
         </CartContext.Provider>
     );
 };
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+    const context = useContext(CartContext);
+    if (!context) {
+        throw new Error("useCart must be used within a CartProvider");
+    }
+    return context;
+};

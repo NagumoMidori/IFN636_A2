@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/cartContext';
 import { getImageUrl } from '../utils/imageUtils';
 
@@ -8,11 +7,10 @@ const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   
   const { cart, removeFromCart, updateCartItem, loading } = useCart();
   
-  const items = cart?.items || [];
+  const items = useMemo(() => cart?.items || [], [cart?.items]);
 
   const cartTotal = useMemo(
     () => items.reduce((total, item) => total + (Number(item.tour?.price || 0) * item.quantity), 0),
