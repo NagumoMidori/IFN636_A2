@@ -28,7 +28,7 @@ describe('Tour API & Booking System Tests', () => {
     await User.create(testUser);
 
     // 4. Execute login and get Token
-    const loginRes = await request(app).post('/api/users/login').send({
+    const loginRes = await request(app).post('/api/auth/login').send({
       email: testUser.email,
       password: testUser.password
     });

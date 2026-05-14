@@ -1,4 +1,4 @@
-const CartFacade = require('../facades/CartFacade');
+const CartFacade = require('../facades/cartFacade');
 
 // get cart
 exports.getCart = async (req, res) => {

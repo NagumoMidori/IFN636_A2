@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axiosInstance from '../axiosConfig';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
@@ -30,6 +31,7 @@ export const CartProvider = ({ children }) => {
         }
         catch (error){
             alert(error.response?.data?.message || "Please login first.");
+            throw error;
         }
     };
     // 3. update item
@@ -63,9 +65,17 @@ export const CartProvider = ({ children }) => {
 
     const clearCart = () => setCart({ items: [] });
 
+    const { user } = useAuth();
+
     useEffect(() => {
-        fetchCart();
-    }, []);
+        if (user) {
+            fetchCart();
+        } 
+        else {
+            setCart({ items: [] });
+            setLoading(false);
+        }
+    }, [user]); 
 
     return (
         <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateCartItem, clearCart, fetchCart }}>

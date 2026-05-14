@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Cart = require('../models/Cart');
 const Tour = require('../models/Tour');
 
@@ -19,6 +20,10 @@ class CartFacade {
 
         // validate information 
         if (!tourId || !tourDate || !quantity || quantity < 1) {
+            throw new Error('BAD_REQUEST');
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(tourId)) {
             throw new Error('BAD_REQUEST');
         }
 
@@ -70,6 +75,10 @@ class CartFacade {
 
     async updateItem(userId, body) {
         const { cartItemId, quantity, tourDate, personalInfo } = body;
+
+        if (!cartItemId || !mongoose.Types.ObjectId.isValid(cartItemId)) {
+            throw new Error('BAD_REQUEST');
+        }
 
         const cart = await Cart.findOne({ user: userId });
         if (!cart) throw new Error('NOT_FOUND');
