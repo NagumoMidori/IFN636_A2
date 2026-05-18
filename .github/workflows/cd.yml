@@ -65,10 +65,10 @@ jobs:
       - name: Restart backend with PM2
         working-directory: backend
         run: |
-          if pm2 describe ifn636-backend >/dev/null 2>&1; then
-            pm2 restart ifn636-backend --update-env
+          if pm2 describe backend >/dev/null 2>&1; then
+            pm2 restart backend --update-env
           else
-            pm2 start npm --name ifn636-backend -- run prod
+            pm2 start npm --name backend -- run prod
           fi
 
           pm2 save
