@@ -148,6 +148,10 @@ backend/uploads/
 # React build output
 frontend/build/
 
+# Local documentation and design assets
+docs/
+design/
+
 # OS files
 .DS_Store
 
@@ -162,4 +166,3 @@ frontend/build/
 .llm/
 .llm/
 .llm/
-
