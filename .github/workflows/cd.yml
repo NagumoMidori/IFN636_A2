@@ -53,11 +53,8 @@ jobs:
       - name: Restart frontend with PM2
         working-directory: frontend
         run: |
-          if pm2 describe Frontend >/dev/null 2>&1; then
-            pm2 restart Frontend --update-env
-          else
-            echo "PM2 process 'Frontend' was not found; skipping frontend restart."
-          fi
+          pm2 delete Frontend >/dev/null 2>&1 || true
+          pm2 serve build/ 3000 --name "Frontend" --spa
 
           pm2 save
 
