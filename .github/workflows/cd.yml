@@ -1,0 +1,74 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: self-hosted
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Write backend environment file
+        working-directory: backend
+        env:
+          PROD_ENV_FILE: ${{ secrets.PROD }}
+        run: |
+          if [ -z "$PROD_ENV_FILE" ]; then
+            echo "Missing required secret: PROD"
+            exit 1
+          fi
+
+          printf '%s\n' "$PROD_ENV_FILE" > .env
+
+      - name: Restart backend with PM2
+        working-directory: backend
+        run: |
+          if pm2 describe ifn636-backend >/dev/null 2>&1; then
+            pm2 restart ifn636-backend --update-env
+          else
+            pm2 start npm --name ifn636-backend -- run prod
+          fi
+
+          pm2 save
