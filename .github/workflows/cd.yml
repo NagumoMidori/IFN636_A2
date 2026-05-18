@@ -50,6 +50,17 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Restart frontend with PM2
+        working-directory: frontend
+        run: |
+          if pm2 describe Frontend >/dev/null 2>&1; then
+            pm2 restart Frontend --update-env
+          else
+            echo "PM2 process 'Frontend' was not found; skipping frontend restart."
+          fi
+
+          pm2 save
+
       - name: Write backend environment file
         working-directory: backend
         env:
