@@ -1,13 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE = 'http://localhost:5001';
+import { getImageUrl } from '../utils/imageUtils';
 
 const TourCard = ({ tour }) => {
   const navigate = useNavigate();
 
-  const imageUrl = tour.imageUrl?.startsWith('http')
-    ? tour.imageUrl
-    : `${API_BASE}${tour.imageUrl}`;
+  const imageUrl = getImageUrl(tour.imageUrl);
 
   return (
     <div

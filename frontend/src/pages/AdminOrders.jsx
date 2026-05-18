@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 const AdminOrders = () => {
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ const AdminOrders = () => {
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
                       <img
-                        src={booking.tour?.imageUrl?.startsWith('http') ? booking.tour.imageUrl : `http://localhost:5001${booking.tour?.imageUrl}`}
+                        src={getImageUrl(booking.tour?.imageUrl)}
                         alt={booking.tour?.title}
                         className="w-10 h-10 rounded-lg object-cover bg-gray-100"
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop'; }}

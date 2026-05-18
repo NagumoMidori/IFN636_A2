@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-
-const API_BASE_URL=process.env.NODE_ENV==='production'?'http://15.135.232.0:5001':'http://localhost:5001';
+export const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'http://15.135.232.0:5001'
+  : 'http://localhost:5001';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

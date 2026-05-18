@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 const EditTour = () => {
   const { id } = useParams();
@@ -43,7 +44,7 @@ const EditTour = () => {
           imageFile: null,
         });
         if (data.imageUrl) {
-          setPreview(data.imageUrl.startsWith('http') ? data.imageUrl : `http://localhost:5001${data.imageUrl}`);
+          setPreview(getImageUrl(data.imageUrl));
         }
       } catch (err) {
         console.error('Fetch error:', err);

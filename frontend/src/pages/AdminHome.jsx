@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
+import { getImageUrl } from "../utils/imageUtils";
 
 const AdminHome = () => {
   const { user } = useAuth();
@@ -176,11 +177,7 @@ const AdminHome = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={
-                          tour.imageUrl?.startsWith("http")
-                            ? tour.imageUrl
-                            : `http://localhost:5001${tour.imageUrl}`
-                        }
+                        src={getImageUrl(tour.imageUrl)}
                         alt={tour.title}
                         className="w-10 h-10 rounded-lg object-cover bg-gray-100"
                         onError={(e) => {

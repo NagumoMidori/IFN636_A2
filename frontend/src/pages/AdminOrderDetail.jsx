@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 const AdminOrderDetail = () => {
   const { id } = useParams();
@@ -38,7 +39,7 @@ const AdminOrderDetail = () => {
   }
 
   const tour = booking.tour;
-  const imageUrl = tour?.imageUrl?.startsWith('http') ? tour.imageUrl : `http://localhost:5001${tour?.imageUrl}`;
+  const imageUrl = getImageUrl(tour?.imageUrl);
 
   const statusColor = {
     Confirmed: 'bg-green-50 text-green-700',
