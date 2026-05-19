@@ -37,7 +37,7 @@ class ReviewFacade {
 
   async getTourReviewSummary(tourId) {
     const reviews = await Review.find({ tour: tourId, status: 'Visible' })
-      .populate('user', 'username email')
+      .populate('user', 'username')
       .sort({ createdAt: -1 });
 
     const reviewCount = reviews.length;
@@ -45,8 +45,16 @@ class ReviewFacade {
       ? 0
       : reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount;
 
+    const publicReviews = reviews.map((review) => ({
+      _id: review._id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
+      user: review.user ? { username: review.user.username } : null
+    }));
+
     return {
-      reviews,
+      reviews: publicReviews,
       averageRating: Number(averageRating.toFixed(1)),
       reviewCount
     };

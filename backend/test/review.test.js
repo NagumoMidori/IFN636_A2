@@ -209,6 +209,24 @@ describe('Review API', () => {
     expect(res.body.reviews[0].comment).toBe('Visible review');
   });
 
+  test('public tour review list does not expose user email or internal fields', async () => {
+    await createBuyerReview(5, 'Public review payload check');
+
+    const res = await request(app).get(`/api/reviews/tour/${tour._id}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.reviews).toHaveLength(1);
+
+    const review = res.body.reviews[0];
+    expect(review.user).toBeDefined();
+    expect(review.user.username).toBe('Review Buyer');
+    expect(review.user.email).toBeUndefined();
+    expect(review.order).toBeUndefined();
+    expect(review.tour).toBeUndefined();
+    expect(Object.keys(review.user)).toEqual(['username']);
+    expect(Object.keys(review).sort()).toEqual(['_id', 'comment', 'createdAt', 'rating', 'user']);
+  });
+
   test('invalid tour id returns 400 for public review list', async () => {
     const res = await request(app).get('/api/reviews/tour/not-a-valid-id');
 

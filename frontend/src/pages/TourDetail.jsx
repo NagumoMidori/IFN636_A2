@@ -383,9 +383,9 @@ const TourDetail = () => {
                 </p>
               )}
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div className="mt-6 flex flex-col gap-4">
                 {(reviewSummary.reviews || []).map((review) => (
-                  <article key={review._id} className="rounded-2xl border border-gray-200 bg-white p-5">
+                  <article key={review._id} className="w-full rounded-2xl border border-gray-200 bg-white p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{review.user?.username || 'Traveler'}</p>
