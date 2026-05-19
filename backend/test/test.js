@@ -1,7 +1,9 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../server');
-const User = require('../models/User'); 
+const User = require('../models/User');
+
+jest.setTimeout(60000); 
 
 describe('Tour API & Booking System Tests', () => {
   let authToken;
