@@ -74,10 +74,9 @@ export const CartProvider = ({ children }) => {
     const { user } = useAuth();
 
     useEffect(() => {
-        if (user) {
+        if (user && user.role !== 'admin') {
             fetchCart();
-        } 
-        else {
+        } else {
             setCart({ items: [] });
             setLoading(false);
         }

@@ -23,6 +23,12 @@ const Payment = () => {
   );
 
   const handlePay = async () => {
+    if (items.length === 0) {
+      alert('Please add at least one tour before checkout.');
+      navigate('/cart');
+      return;
+    }
+
     if (hasInvalidItems) {
       alert('Please return to your shopping cart and fill in all the dates and phone numbers for your trip.');
       navigate('/cart');
@@ -32,22 +38,10 @@ const Payment = () => {
     setProcessing(true);
 
     try {
-      // Iterate through the projects to create appointments 
-      for (const item of items) {
-        await axiosInstance.post('/api/bookings', {
-          tour: item.tour?._id, 
-          tourDate: item.tourDate,
-          quantity: Number(item.quantity),
-          totalPrice: Number(item.tour?.price * item.quantity),
-          personalInfo: item.personalInfo,
-        });
-      }
-
-      // Clear the cart in both the backend and frontend after successful checkout.
-      await axiosInstance.delete('/api/cart'); 
+      await axiosInstance.post('/api/orders');
       clearCart(); 
       
-      alert('Payment successful! Your appointment has been made.');
+      alert('Payment successful! Your order has been created.');
       navigate('/my-bookings');
     } catch (err) {
       alert(`Payment failed: ${err.response?.data?.message || 'Please try again later.'}`);
