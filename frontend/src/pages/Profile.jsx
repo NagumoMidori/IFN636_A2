@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import axiosInstance from '../axiosConfig';
 
 const Profile = () => {
-  const { user } = useAuth(); // Access user token from context
+  const { user } = useAuth();
+  const { notifySuccess, notifyError } = useNotification();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,7 +29,7 @@ const Profile = () => {
           address: response.data.address || '',
         });
       } catch (error) {
-        alert('Failed to fetch profile. Please try again.');
+        notifyError('Failed to fetch profile. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -43,9 +45,9 @@ const Profile = () => {
       await axiosInstance.put('/api/auth/profile', formData, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-      alert('Profile updated successfully!');
+      notifySuccess('Profile updated successfully!');
     } catch (error) {
-      alert('Failed to update profile. Please try again.');
+      notifyError('Failed to update profile. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import axiosInstance from '../axiosConfig';
 
 const TourForm = ({ editingTour, onSuccess, onClose }) => {
   const { user } = useAuth();
-  // 使用 useRef 來觸發隱藏的 file input
+  const { notifySuccess, notifyError, notifyWarning } = useNotification();
   const fileInputRef = useRef(null);
   
   // 1. 基本資料狀態 (對齊 Figma 欄位)
@@ -21,9 +22,9 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
     status: 'Available'
   });
 
-  // 2. 圖片相關狀態
-  const [imageFile, setImageFile] = useState(null); // 真正的圖片檔案 (上傳用)
-  const [imagePreview, setImagePreview] = useState(null); // 圖片的網址 (預覽用)
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   useEffect(() => {
     if (editingTour) {
@@ -68,7 +69,7 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user?.token) return alert("Please login again.");
+    if (!user?.token) { notifyWarning('Please login again.'); return; }
 
     try {
       // 🔴 關鍵：使用 FormData 來處理包含檔案的表單
@@ -106,25 +107,26 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
         await axiosInstance.post('/api/tours', data, config);
       }
       
-      alert('Success!');
-      onSuccess(); // 成功後關閉彈窗並刷新列表
+      notifySuccess(editingTour ? 'Tour updated successfully.' : 'Tour created successfully.');
+      onSuccess();
     } catch (error) {
       console.error(error);
-      alert('Save failed: ' + (error.response?.data?.message || 'Check Server Logs'));
+      notifyError('Save failed: ' + (error.response?.data?.message || 'Check Server Logs'));
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this tour package?")) return;
     try {
       await axiosInstance.delete(`/api/tours/${editingTour._id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      alert('Deleted Successfully!');
+      notifySuccess('Deleted successfully.');
       onSuccess();
     } catch (error) {
       console.error(error);
-      alert('Delete failed.');
+      notifyError('Delete failed.');
+    } finally {
+      setConfirmingDelete(false);
     }
   };
 
@@ -332,15 +334,24 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
             {editingTour ? 'Update Changes' : 'Submit'}
           </button>
           
-          {/* 🔴 刪除按鈕只在編輯模式出現 */}
-          {editingTour && (
-            <button 
-              type="button" 
-              onClick={handleDelete} 
+          {editingTour && !confirmingDelete && (
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(true)}
               className="w-full text-red-500 font-bold py-3 mt-2 hover:bg-red-50 rounded-xl transition-colors"
             >
               Delete Tour Package
             </button>
+          )}
+          {editingTour && confirmingDelete && (
+            <div className="flex gap-3 mt-2">
+              <button type="button" onClick={() => setConfirmingDelete(false)} className="flex-1 py-3 font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                Cancel
+              </button>
+              <button type="button" onClick={handleDelete} className="flex-1 py-3 font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors">
+                Confirm delete
+              </button>
+            </div>
           )}
         </div>
       </form>

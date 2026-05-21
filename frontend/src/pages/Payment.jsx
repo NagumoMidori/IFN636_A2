@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useCart } from '../context/cartContext';
+import { useNotification } from '../context/NotificationContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')}`;
@@ -10,6 +11,7 @@ const Payment = () => {
   const navigate = useNavigate();
   // From Context get cart information and clear method
   const { cart, clearCart } = useCart();
+  const { notifySuccess, notifyError, notifyWarning } = useNotification();
   const items = useMemo(() => cart?.items || [], [cart?.items]);
   const [processing, setProcessing] = useState(false);
 
@@ -24,13 +26,13 @@ const Payment = () => {
 
   const handlePay = async () => {
     if (items.length === 0) {
-      alert('Please add at least one tour before checkout.');
+      notifyWarning('Please add at least one tour before checkout.');
       navigate('/cart');
       return;
     }
 
     if (hasInvalidItems) {
-      alert('Please return to your shopping cart and fill in all the dates and phone numbers for your trip.');
+      notifyWarning('Please return to your shopping cart and fill in all the dates and phone numbers for your trip.');
       navigate('/cart');
       return;
     }
@@ -39,12 +41,12 @@ const Payment = () => {
 
     try {
       await axiosInstance.post('/api/orders');
-      clearCart(); 
-      
-      alert('Payment successful! Your order has been created.');
+      clearCart();
+
+      notifySuccess('Payment successful! Your order has been created.');
       navigate('/my-bookings');
     } catch (err) {
-      alert(`Payment failed: ${err.response?.data?.message || 'Please try again later.'}`);
+      notifyError(`Payment failed: ${err.response?.data?.message || 'Please try again later.'}`);
     } finally {
       setProcessing(false);
     }

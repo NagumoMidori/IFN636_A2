@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { useNotification } from '../context/NotificationContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const EditTour = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { notifySuccess, notifyError } = useNotification();
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -73,9 +75,10 @@ const EditTour = () => {
       });
 
       await axiosInstance.put(`/api/tours/${id}`, data);
+      notifySuccess('Tour updated successfully.');
       navigate('/admin/tours');
     } catch (err) {
-      alert(`Update failed: ${err.response?.data?.message || 'Error'}`);
+      notifyError(`Update failed: ${err.response?.data?.message || 'Error'}`);
     } finally {
       setLoading(false);
     }
