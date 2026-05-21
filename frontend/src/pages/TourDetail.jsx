@@ -92,7 +92,7 @@ const TourDetail = () => {
 
   const totalPrice = useMemo(() => Number(tour?.price || 0) * quantity, [quantity, tour]);
   const minDate = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const importantNotes = tour?.importantNotes || tour?.notes;
+  const importantNotes = tour?.importantNotes;
   const hasPurchasedTour = useMemo(
     () => orders.some((order) => (
       order.status !== 'Cancelled'
@@ -280,7 +280,11 @@ const TourDetail = () => {
             </p>
           </div>
           <p className="text-xl font-semibold text-gray-900">
-            {formatPrice(tour.price)} <span className="text-sm font-normal text-gray-500">per person</span>
+            {formatPrice(tour.price)}
+            {tour.type === 'promo' && tour.originalPrice > tour.price && (
+              <span className="ml-2 text-base font-normal text-gray-400 line-through">{formatPrice(tour.originalPrice)}</span>
+            )}
+            <span className="text-sm font-normal text-gray-500"> per person</span>
           </p>
         </div>
 
@@ -434,7 +438,12 @@ const TourDetail = () => {
               <>
                 <div className="flex items-baseline justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">Add to cart</h2>
-                  <p className="text-sm text-gray-500">{formatPrice(tour.price)} each</p>
+                  <p className="text-sm text-gray-500">
+                    {formatPrice(tour.price)} each
+                    {tour.type === 'promo' && tour.originalPrice > tour.price && (
+                      <span className="ml-1 text-gray-400 line-through">{formatPrice(tour.originalPrice)}</span>
+                    )}
+                  </p>
                 </div>
 
                 <div className="mt-6 space-y-4">

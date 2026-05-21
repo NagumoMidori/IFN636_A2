@@ -8,16 +8,16 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
   const fileInputRef = useRef(null);
   
   // 1. 基本資料狀態 (對齊 Figma 欄位)
-  const [formData, setFormData] = useState({ 
-    title: '', 
-    location: '', 
-    startDate: '', 
-    endDate: '', 
-    description: '', 
+  const [formData, setFormData] = useState({
+    title: '',
+    location: '',
+    startDate: '',
+    endDate: '',
+    description: '',
     importantNotes: '',
     capacity: '',
-    price: '', 
-    discount: '',
+    originalPrice: '',
+    type: 'day',
     status: 'Available'
   });
 
@@ -41,10 +41,10 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
       }
     } else {
       // 新增模式：清空所有狀態
-      setFormData({ 
-        title: '', location: '', startDate: '', endDate: '', 
-        description: '', importantNotes: '', capacity: '', 
-        price: '', discount: '', status: 'Available' 
+      setFormData({
+        title: '', location: '', startDate: '', endDate: '',
+        description: '', importantNotes: '', capacity: '',
+        originalPrice: '', type: 'day', status: 'Available'
       });
       setImageFile(null);
       setImagePreview(null);
@@ -273,32 +273,41 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
           />
         </div>
 
-        {/* Price & Discount (Figma 並排設計) */}
+        {/* Price & Tour Type (並排設計) */}
         <div className="flex space-x-4">
           <div className="flex-1 space-y-2">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Price (in AUD)</label>
             <div className="relative">
               {/* 貨幣符號固定在左側 */}
               <span className="absolute left-4 top-[17px] text-gray-400 font-bold">$</span>
-              <input 
-                type="number" 
-                placeholder="Enter price" 
-                value={formData.price} 
-                onChange={e => setFormData({...formData, price: e.target.value})} 
-                className="w-full p-4 pl-9 bg-white border border-gray-100 rounded-xl outline-none shadow-sm placeholder-gray-300" 
-                required 
+              <input
+                type="number"
+                placeholder="Enter price"
+                value={formData.originalPrice}
+                onChange={e => setFormData({...formData, originalPrice: e.target.value})}
+                className="w-full p-4 pl-9 bg-white border border-gray-100 rounded-xl outline-none shadow-sm placeholder-gray-300"
+                required
               />
             </div>
           </div>
           <div className="flex-1 space-y-2">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Discount (%)</label>
-            <input 
-              type="number" 
-              placeholder="Enter discount" 
-              value={formData.discount} 
-              onChange={e => setFormData({...formData, discount: e.target.value})} 
-              className="w-full p-4 bg-white border border-gray-100 rounded-xl outline-none shadow-sm placeholder-gray-300" 
-            />
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Tour Type</label>
+            <div className="relative">
+              <select
+                value={formData.type}
+                onChange={e => setFormData({...formData, type: e.target.value})}
+                className="w-full p-4 bg-white border border-gray-100 rounded-xl appearance-none outline-none shadow-sm text-gray-700 cursor-pointer"
+              >
+                <option value="day">Day Tour</option>
+                <option value="promo">Promo (10% off)</option>
+              </select>
+              {/* 下拉箭頭 Icon */}
+              <div className="absolute right-4 top-5 pointer-events-none text-emerald-500">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
