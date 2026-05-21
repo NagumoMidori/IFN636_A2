@@ -4,7 +4,6 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
 const tourRoutes = require('./routes/tourRoutes');
-const bookingRoutes = require('./routes/bookingRoutes');
 const authRoutes = require('./routes/authRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -26,7 +25,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // 路由設定
 app.use('/api/auth', authRoutes);
 app.use('/api/tours', tourRoutes);
-app.use('/api/bookings', bookingRoutes); 
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);

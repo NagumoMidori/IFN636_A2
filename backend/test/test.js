@@ -5,7 +5,7 @@ const User = require('../models/User');
 
 jest.setTimeout(60000); 
 
-describe('Tour API & Booking System Tests', () => {
+describe('Tour API Tests', () => {
   let authToken;
   let cartItemId;
   const sampleTourId = "6a05c123f42ecfa629809578"; // Need to fill in real Tour Id
