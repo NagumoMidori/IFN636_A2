@@ -22,6 +22,7 @@ const EditTour = () => {
     price: '',
     discount: '',
     status: 'Available',
+    type: 'day',
     imageFile: null,
   });
 
@@ -41,6 +42,7 @@ const EditTour = () => {
           price: data.price || '',
           discount: data.discount || '',
           status: data.status || 'Available',
+          type: data.type || 'day',
           imageFile: null,
         });
         if (data.imageUrl) {
@@ -208,6 +210,11 @@ const EditTour = () => {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                 <input type="number" name="price" value={formData.price} onChange={handleChange} className={`${inputStyle} pl-8`} required />
               </div>
+              {formData.type === 'promo' && formData.price && (
+                <p className="text-xs font-semibold text-emerald-600 mt-1.5">
+                  Promo active: Final price will be AUD {(Number(formData.price) * 0.9).toFixed(2)} (10% OFF)
+                </p>
+              )}
             </div>
             <div>
               <label className={labelStyle}>Discount (AUD)</label>
@@ -217,6 +224,17 @@ const EditTour = () => {
               </div>
             </div>
           </div>
+          
+          {/* Tour Type form */}
+          <div className="max-w-xs mb-6">
+            <label className={labelStyle}>Tour Type</label>
+            <select name="type" value={formData.type} onChange={handleChange} className={inputStyle}>
+              <option value="day">Day Tour</option>
+              <option value="package">Package</option>
+              <option value="promo">Promo Tour</option>
+            </select>
+          </div>
+
 
           {/* Status */}
           <div className="max-w-xs">

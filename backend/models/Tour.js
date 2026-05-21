@@ -4,8 +4,9 @@ const tourSchema = new mongoose.Schema({
   title: { type: String, required: true },
   location: { type: String },
   price: { type: Number, required: true },
-  imageUrl: { type: String }, // 🔴 確保這行存在，否則照片網址存不進去
+  imageUrl: { type: String },
   status: { type: String, default: 'Available' },
+  type: { type: String,required: true, default: 'day' },
   startDate: { type: Date },
   endDate: { type: Date },
   description: { type: String },

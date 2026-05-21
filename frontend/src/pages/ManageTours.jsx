@@ -19,6 +19,7 @@ const ManageTours = () => {
     price: '',
     discount: '',
     status: 'Available',
+    type: '',
     imageFile: null,
   });
 
@@ -164,6 +165,11 @@ const ManageTours = () => {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                 <input type="number" name="price" placeholder="0" onChange={handleChange} className={`${inputStyle} pl-8`} required />
               </div>
+              {formData.type === 'promo' && formData.price && (
+                <p className="text-xs font-semibold text-emerald-600 mt-1.5 animate-pulse">
+                  ✨ Promo active: Final price will be AUD {(Number(formData.price) * 0.9).toFixed(2)} (10% OFF)
+                </p>
+              )}
             </div>
             <div>
               <label className={labelStyle}>Discount (AUD)</label>
@@ -172,6 +178,16 @@ const ManageTours = () => {
                 <input type="number" name="discount" placeholder="0" onChange={handleChange} className={`${inputStyle} pl-8`} />
               </div>
             </div>
+          </div>
+
+          {/* Tour Type form */}
+          <div className="max-w-xs mb-6">
+            <label className={labelStyle}>Tour Type</label>
+            <select name="type" value={formData.type} onChange={handleChange} className={inputStyle}>
+              <option value="day">Day Tour </option>
+              <option value="package">Package </option>
+              <option value="promo">Promo Tour (10% Off)</option>
+            </select>
           </div>
 
           {/* Status */}
