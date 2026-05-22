@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from '../context/AuthContext';
-/* import { addCartItem, getImageUrl } from '../utils/cartStorage'; */
 import { useCart } from '../context/cartContext';
-import { getImageUrl } from '../utils/imageUtils';
+import { useNotification } from '../context/NotificationContext';
+import TourImageGallery from '../components/TourImageGallery';
 
 const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')}`;
 
@@ -13,6 +13,7 @@ const TourDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const { notifySuccess, notifyError, notifyWarning } = useNotification();
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -26,6 +27,7 @@ const TourDetail = () => {
   const [ownReview, setOwnReview] = useState(null);
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewMessage, setReviewMessage] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   
 
@@ -94,7 +96,7 @@ const TourDetail = () => {
 
   const totalPrice = useMemo(() => Number(tour?.price || 0) * quantity, [quantity, tour]);
   const minDate = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const importantNotes = tour?.importantNotes || tour?.notes;
+  const importantNotes = tour?.importantNotes;
   const hasPurchasedTour = useMemo(
     () => orders.some((order) => (
       order.status !== 'Cancelled'
@@ -109,14 +111,14 @@ const TourDetail = () => {
   const canCreateReview = Boolean(user && user.role !== 'admin' && hasPurchasedTour && !hasReviewedTour);
 
   const handleRemove = async () => {
-    if (!window.confirm('Are you sure you want to delete this tour?')) return;
-
     try {
       await axiosInstance.delete(`/api/tours/${id}`);
-      alert('Tour deleted successfully.');
+      notifySuccess('Tour deleted successfully.');
       navigate('/admin/tours');
     } catch (err) {
-      alert(`Delete failed: ${err.response?.data?.message || 'Unauthorized'}`);
+      notifyError(`Delete failed: ${err.response?.data?.message || 'Unauthorized'}`);
+    } finally {
+      setConfirmingDelete(false);
     }
   };
 
@@ -124,23 +126,23 @@ const TourDetail = () => {
 
   const handleAddToCart = async () => {
     if (!user) {
-      alert('Please sign in before adding a tour to your cart.');
+      notifyWarning('Please sign in before adding a tour to your cart.');
       navigate('/login');
       return;
     }
 
     if (user.role === 'admin') {
-      alert('Admin accounts cannot add tours to cart.');
+      notifyWarning('Admin accounts cannot add tours to cart.');
       return;
     }
 
     if (!tourDate) {
-      alert('Please select a tour date.');
+      notifyWarning('Please select a tour date.');
       return;
     }
 
     if (!phone.trim()) {
-      alert('Please enter your phone number.');
+      notifyWarning('Please enter your phone number.');
       return;
     }
 
@@ -151,11 +153,9 @@ const TourDetail = () => {
         phone: phone.trim(),
       });
 
-      // navigate to cart
       navigate('/cart');
     } catch (err) {
-      // handle backend 404 400 error
-      alert(err.response?.data?.message || 'Failed to add to cart. Please try again.');
+      // cartContext already shows the error notification
     }
   };
 
@@ -188,52 +188,13 @@ const TourDetail = () => {
     }
   };
 
-  /* const handleAddToCart = () => {
-    if (!user) {
-      alert('Please sign in before adding a tour to your cart.');
-      navigate('/login');
-      return;
-    }
-
-    if (user.role === 'admin') {
-      alert('Admin accounts cannot add tours to cart.');
-      return;
-    }
-
-    if (!tourDate) {
-      alert('Please select a tour date.');
-      return;
-    }
-
-    if (!phone.trim()) {
-      alert('Please enter your phone number.');
-      return;
-    }
-
-    addCartItem({
-      tour: tour._id,
-      tourTitle: tour.title,
-      tourLocation: tour.location,
-      tourImageUrl: tour.imageUrl,
-      unitPrice: Number(tour.price) || 0,
-      tourDate,
-      quantity,
-      personalInfo: {
-        fullName: user.username,
-        email: user.email,
-        phone: phone.trim(),
-      },
-    });
-
-    navigate('/cart');
-  }; */
 
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="animate-pulse">
           <div className="h-6 w-40 rounded bg-gray-200" />
-          <div className="mt-8 aspect-[16/7] rounded-3xl bg-gray-200" />
+          <div className="mt-8 h-[430px] rounded-3xl bg-gray-200" />
           <div className="mt-8 h-8 w-2/3 rounded bg-gray-200" />
           <div className="mt-4 h-4 w-1/2 rounded bg-gray-200" />
         </div>
@@ -282,20 +243,15 @@ const TourDetail = () => {
             </p>
           </div>
           <p className="text-xl font-semibold text-gray-900">
-            {formatPrice(tour.price)} <span className="text-sm font-normal text-gray-500">per person</span>
+            {formatPrice(tour.price)}
+            {tour.type === 'promo' && tour.originalPrice > tour.price && (
+              <span className="ml-2 text-base font-normal text-gray-400 line-through">{formatPrice(tour.originalPrice)}</span>
+            )}
+            <span className="text-sm font-normal text-gray-500"> per person</span>
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-3xl bg-gray-100">
-          <img
-            src={getImageUrl(tour.imageUrl)}
-            alt={tour.title}
-            className="aspect-[16/7] w-full object-cover"
-            onError={(event) => {
-              event.currentTarget.src = '/images/bondi_beach.jpg';
-            }}
-          />
-        </div>
+        <TourImageGallery title={tour.title} imageUrl={tour.imageUrl} />
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="min-w-0">
@@ -423,20 +379,44 @@ const TourDetail = () => {
                   >
                     Edit tour
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleRemove}
-                    className="w-full rounded-lg border border-red-200 px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50"
-                  >
-                    Remove tour
-                  </button>
+                  {confirmingDelete ? (
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingDelete(false)}
+                        className="flex-1 rounded-lg border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRemove}
+                        className="flex-1 rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700"
+                      >
+                        Confirm delete
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDelete(true)}
+                      className="w-full rounded-lg border border-red-200 px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-50"
+                    >
+                      Remove tour
+                    </button>
+                  )}
                 </div>
               </>
             ) : (
               <>
                 <div className="flex items-baseline justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">Add to cart</h2>
-                  <p className="text-sm text-gray-500">{formatPrice(tour.price)} each</p>
+                  <p className="text-sm text-gray-500">
+                    {formatPrice(tour.price)} each
+                    {tour.type === 'promo' && tour.originalPrice > tour.price && (
+                      <span className="ml-1 text-gray-400 line-through">{formatPrice(tour.originalPrice)}</span>
+                    )}
+                  </p>
                 </div>
 
                 <div className="mt-6 space-y-4">

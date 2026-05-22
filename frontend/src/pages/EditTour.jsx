@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { useNotification } from '../context/NotificationContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const EditTour = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { notifySuccess, notifyError } = useNotification();
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,9 +22,8 @@ const EditTour = () => {
     importantNotes: '',
     capacity: '',
     originalPrice: '',
-    discount: '',
-    status: 'Available',
     type: 'day',
+    status: 'Available',
     imageFile: null,
   });
 
@@ -37,9 +38,10 @@ const EditTour = () => {
           startDate: data.startDate ? data.startDate.split('T')[0] : '',
           endDate: data.endDate ? data.endDate.split('T')[0] : '',
           description: data.description || '',
-          notes: data.importantNotes || '',
+          importantNotes: data.importantNotes || '',
           capacity: data.capacity || '',
-          price: data.originalPrice || '',
+          originalPrice: data.originalPrice || data.price || '',
+          type: data.type || 'day',
           status: data.status || 'Available',
           type: data.type || 'day',
           imageFile: null,
@@ -74,9 +76,10 @@ const EditTour = () => {
       });
 
       await axiosInstance.put(`/api/tours/${id}`, data);
+      notifySuccess('Tour updated successfully.');
       navigate('/admin/tours');
     } catch (err) {
-      alert(`Update failed: ${err.response?.data?.message || 'Error'}`);
+      notifyError(`Update failed: ${err.response?.data?.message || 'Error'}`);
     } finally {
       setLoading(false);
     }
@@ -197,34 +200,28 @@ const EditTour = () => {
             />
           </div>
 
-          {/* Capacity, Price */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Capacity, Price, Tour Type */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
               <label className={labelStyle}>Capacity / day</label>
               <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} className={inputStyle} />
             </div>
             <div>
-              <label className={labelStyle}>Price (AUD)</label>
+              <label className={labelStyle}>Original Price (AUD)</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                 <input type="number" name="originalPrice" value={formData.originalPrice} onChange={handleChange} className={`${inputStyle} pl-8`} required />
               </div>
-              {formData.type === 'promo' && formData.price && (
-                <p className="text-xs font-semibold text-emerald-600 mt-1.5">
-                  Promo active: Final price will be AUD {(Number(formData.price) * 0.9).toFixed(2)} (10% OFF)
-                </p>
-              )}
+            </div>
+            <div>
+              <label className={labelStyle}>Tour Type</label>
+              <select name="type" value={formData.type} onChange={handleChange} className={inputStyle}>
+                <option value="day">Day Tour</option>
+                <option value="promo">Promo (10% off)</option>
+              </select>
             </div>
           </div>
-          
-          {/* Tour Type form */}
-          <div className="max-w-xs mb-6">
-            <label className={labelStyle}>Tour Type</label>
-            <select name="type" value={formData.type} onChange={handleChange} className={inputStyle}>
-              <option value="day">Day Tour</option>
-              <option value="promo">Promo Tour</option>
-            </select>
-          </div>
+
 
 
           {/* Status */}
