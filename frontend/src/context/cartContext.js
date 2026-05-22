@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axiosInstance from '../axiosConfig';
 import { useAuth } from './AuthContext';
+import { useNotification } from './NotificationContext';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState({ items: [] });
     const [loading, setLoading] = useState(true);
+    const { notifySuccess, notifyError } = useNotification();
 
     // 1. 從後端獲取購物車資料 get cart information from backend
     const fetchCart = async () => {
@@ -27,10 +29,10 @@ export const CartProvider = ({ children }) => {
                 tourId, quantity, tourDate, personalInfo 
             });
             setCart(data);
-            alert("Add to cart successfully!");
+            notifySuccess('Added to cart.');
         }
         catch (error){
-            alert(error.response?.data?.message || "Please login first.");
+            notifyError(error.response?.data?.message || 'Please sign in before adding a tour to your cart.');
             throw error;
         }
     };

@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { useNotification } from '../context/NotificationContext';
 
 const ManageTours = () => {
   const navigate = useNavigate();
+  const { notifySuccess, notifyError } = useNotification();
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -40,9 +42,10 @@ const ManageTours = () => {
       });
 
       await axiosInstance.post('/api/tours', data);
+      notifySuccess('Tour created successfully.');
       navigate('/admin/tours');
     } catch (err) {
-      alert(`Error: ${err.response?.data?.message || 'Failed to add tour'}`);
+      notifyError(err.response?.data?.message || 'Failed to add tour.');
     } finally {
       setLoading(false);
     }

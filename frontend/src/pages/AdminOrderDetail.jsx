@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
+import { useNotification } from '../context/NotificationContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const formatDate = (value) => {
@@ -28,6 +29,7 @@ const valueStyle = 'mt-0.5 text-sm font-medium text-gray-900';
 const AdminOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { notifySuccess, notifyError } = useNotification();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusSaving, setStatusSaving] = useState(false);
@@ -54,8 +56,9 @@ const AdminOrderDetail = () => {
     try {
       const response = await axiosInstance.patch(`/api/orders/${id}/status`, { status });
       setOrder(response.data);
+      notifySuccess(`Order status updated to ${status}.`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update order status.');
+      notifyError(err.response?.data?.message || 'Failed to update order status.');
     } finally {
       setStatusSaving(false);
     }
