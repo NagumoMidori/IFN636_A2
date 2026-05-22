@@ -1,13 +1,27 @@
 const Tour = require('../models/Tour');
 
-// @desc    獲取所有行程
-// @route   GET /api/tours
+const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// @desc    Get tours (with optional search)
+// @route   GET /api/tours?search=keyword
 exports.getTours = async (req, res) => {
     try {
-        const tours = await Tour.find({}).sort({ createdAt: -1 });
+        const { search } = req.query;
+        const filter = {};
+
+        if (search && search.trim()) {
+            const regex = new RegExp(escapeRegExp(search.trim()), 'i');
+            filter.$or = [
+                { title: regex },
+                { location: regex },
+                { description: regex },
+            ];
+        }
+
+        const tours = await Tour.find(filter).sort({ createdAt: -1 });
         res.json(tours);
     } catch (err) {
-        res.status(500).json({ message: "獲取行程失敗: " + err.message });
+        res.status(500).json({ message: "Failed to fetch tours: " + err.message });
     }
 };
 
