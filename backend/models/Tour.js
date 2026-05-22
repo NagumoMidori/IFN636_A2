@@ -10,14 +10,6 @@ const calculateFinalPrice = (type, originalPrice) => {
 };
 
 const tourSchema = new mongoose.Schema({
-<<<<<<< HEAD
-  title: { type: String, required: true },
-  location: { type: String },
-  price: { type: Number, required: true },
-  imageUrl: { type: String },
-  status: { type: String, default: 'Available' },
-  type: { type: String,required: true, default: 'day' },
-=======
   title: { type: String, required: true, trim: true },
   location: { type: String, trim: true },
   originalPrice: { type: Number, required: true, min: 0 },
@@ -25,7 +17,6 @@ const tourSchema = new mongoose.Schema({
   imageUrl: { type: String },
   status: { type: String, default: 'Available' },
   type: { type: String, enum: TOUR_TYPES, default: 'day' },
->>>>>>> origin/main
   startDate: { type: Date },
   endDate: { type: Date },
   description: { type: String, trim: true },

@@ -57,35 +57,30 @@ exports.createTour = async (req, res) => {
 // @route   PUT /api/tours/:id
 exports.updateTour = async (req, res) => {
     try {
-        console.log(`🔄 [Update] ID: ${req.params.id}`);
+        console.log(`🔄 [Update via Factory + Schema Hook] ID: ${req.params.id}`);
         
-        // 1. Retrieve the "old data" of this trip from the database (to identify if it was a previous promo).
-        const oldTour = await Tour.findById(req.params.id);
-        if (!oldTour) {
-            return res.status(404).json({ message: 'Update failed' });
-        }
-
-        // 2. Extract the type structure from req.body.
         const { type, ...restBody } = req.body;
         const updateData = { ...restBody };
 
-        // If new photos were uploaded during the update, overwrite the imageUrl.
         if (req.file) {
             updateData.imageUrl = `/uploads/${req.file.filename}`;
-            console.log("[Update] New image uploaded:", updateData.imageUrl);
         }
 
-        // 3. Integrate the factory's business logic into the processing of the data that is about to be updated.
-        const processedUpdateData = TourFactory.applyBusinessLogic(type, updateData, oldTour);
+        // 1. Have the factory inject any missing important notes and correct the type.
+        const processedUpdateData = TourFactory.applyBusinessLogic(type, updateData);
 
-        // 4. Write the processed data (processedUpdateData) from the factory to the database.
+        // 2. Write in database
         const updatedTour = await Tour.findByIdAndUpdate(
             req.params.id,
             { $set: processedUpdateData },
-            { new: true, runValidators: true }
+            { new: true, runValidators: true } 
         );
 
-        console.log("[Update] Success with Factory Logic");
+        if (!updatedTour) {
+            return res.status(404).json({ message: 'Update failed, tour not found.' });
+        }
+
+        console.log("[Update] Success. Price auto-calculated by Schema Middleware.");
         res.json(updatedTour);
     } catch (err) {
         console.error("[Update] Error:", err.message);
