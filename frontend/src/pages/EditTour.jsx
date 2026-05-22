@@ -43,7 +43,6 @@ const EditTour = () => {
           originalPrice: data.originalPrice || data.price || '',
           type: data.type || 'day',
           status: data.status || 'Available',
-          type: data.type || 'day',
           imageFile: null,
         });
         if (data.imageUrl) {

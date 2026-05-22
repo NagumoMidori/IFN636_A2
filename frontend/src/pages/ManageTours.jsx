@@ -21,7 +21,6 @@ const ManageTours = () => {
     originalPrice: '',
     type: 'day',
     status: 'Available',
-    type: '',
     imageFile: null,
   });
 
