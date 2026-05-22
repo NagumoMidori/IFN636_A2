@@ -71,7 +71,7 @@ describe('GET /api/tours?search=', () => {
   });
 
   it('matches tours by title (case-insensitive)', async () => {
-    const res = await request(app).get(`/api/tours?search=sydney+harbour+${runId}`);
+    const res = await request(app).get(`/api/tours?search=sydney+harbour+cruise+${runId}`);
     expect(res.status).toBe(200);
     const ids = res.body.map((t) => t._id);
     expect(ids).toContain(tourSydney._id.toString());
