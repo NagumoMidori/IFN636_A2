@@ -33,6 +33,9 @@ const TourCard = ({ tour }) => {
         </p>
         <p className="text-[15px] text-gray-900 mt-1">
           <span className="font-semibold">AUD ${tour.price}</span>
+          {tour.type === 'promo' && tour.originalPrice > tour.price && (
+            <span className="ml-1.5 text-sm text-gray-400 line-through">AUD ${tour.originalPrice}</span>
+          )}
           <span className="text-gray-500 font-normal"> / person</span>
         </p>
       </div>
