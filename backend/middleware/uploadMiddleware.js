@@ -1,18 +1,17 @@
 const multer = require('multer');
 const path = require('path');
 
-// 設定儲存引擎
+// Configure storage engine
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // 確保你的 backend 目錄下有一個 uploads 資料夾
+        cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
-        // 重新命名檔案：時間戳 + 原副檔名
         cb(null, `${Date.now()}-${file.originalname}`);
     }
 });
 
-// 檢查檔案類型
+// Validate file type
 function checkFileType(file, cb) {
     const filetypes = /jpg|jpeg|png|webp/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());

@@ -71,7 +71,7 @@ exports.createTour = async (req, res) => {
 // @route   PUT /api/tours/:id
 exports.updateTour = async (req, res) => {
     try {
-        console.log(`🔄 [Update via Factory + Schema Hook] ID: ${req.params.id}`);
+        console.log(`[Update via Factory + Schema Hook] ID: ${req.params.id}`);
         
         const { type, ...restBody } = req.body;
         const updateData = { ...restBody };

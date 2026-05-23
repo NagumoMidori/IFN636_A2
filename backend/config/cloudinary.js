@@ -11,11 +11,11 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'tpms_tours', // 圖片在雲端的資料夾名稱
+    folder: 'tpms_tours',
     allowed_formats: ['jpg', 'png', 'jpeg'],
   },
 });
 
 const upload = multer({ storage: storage });
 
-module.exports = upload; // 匯出，之後給 Route 用
+module.exports = upload;
