@@ -81,7 +81,7 @@ exports.updateTour = async (req, res) => {
         }
 
         // 1. Have the factory inject any missing important notes and correct the type.
-        const processedUpdateData = TourFactory.applyBusinessLogic(type, updateData);
+        const processedUpdateData = TourFactory.applyUpdateData(type, updateData);
 
         // 2. Write in database
         const updatedTour = await Tour.findByIdAndUpdate(

@@ -62,7 +62,7 @@ const Payment = () => {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/" className="rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700">
-              Explore the trop
+              Explore tours
             </Link>
             <Link to="/cart" className="rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
               Check cart

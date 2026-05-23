@@ -1,28 +1,27 @@
 const Tour = require('../models/Tour'); //
 
 class TourFactory {
+    static normalizeType(type) {
+        if (type === undefined || type === null || type === '') return undefined;
 
-    static applyBusinessLogic(type, data) {
-        const tourType = type ? type.toLowerCase() : 'day';
-        const finalData = { ...data };
+        const normalizedType = String(type).toLowerCase();
+        if (!['day', 'promo'].includes(normalizedType)) {
+            throw new Error('Invalid tour type');
+        }
 
-        // 1. The only restriction types are day and promo
-        finalData.type = tourType === 'promo' ? 'promo' : 'day';
-
-        // 2. Based on the type, inject the corresponding preset precautions
-        const defaultNotes = {
-            day: 'Bring water, sunscreen, and comfortable walking shoes. Day trip only.',
-            promo: 'Special promotion item. Non-refundable once booked.'
-        };
-        finalData.importantNotes = data.importantNotes || defaultNotes[finalData.type] || 'Standard tour notes.';
-
-        return finalData;
+        return normalizedType;
     }
 
-    // when add new tour
+    // If the front-end does not provide a type, no preset value will be inserted.
+    static applyUpdateData(type, data) {
+        const normalizedType = this.normalizeType(type);
+        return normalizedType ? { ...data, type: normalizedType } : { ...data };
+    }
+
+    // When adding a new trip, the default value 'day' will only be given if the 'type' field is missing.
     static createTour(type, data) {
-        const processedData = this.applyBusinessLogic(type, data);
-        return new Tour(processedData); 
+        const normalizedType = this.normalizeType(type) || 'day';
+        return new Tour({ ...data, type: normalizedType });
     }
 }
 
