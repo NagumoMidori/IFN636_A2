@@ -1,11 +1,9 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
-import { useNotification } from '../context/NotificationContext';
 
 const ManageTours = () => {
   const navigate = useNavigate();
-  const { notifySuccess, notifyError } = useNotification();
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,10 +14,10 @@ const ManageTours = () => {
     startDate: '',
     endDate: '',
     description: '',
-    importantNotes: '',
+    notes: '',
     capacity: '',
-    originalPrice: '',
-    type: 'day',
+    price: '',
+    discount: '',
     status: 'Available',
     imageFile: null,
   });
@@ -42,10 +40,9 @@ const ManageTours = () => {
       });
 
       await axiosInstance.post('/api/tours', data);
-      notifySuccess('Tour created successfully.');
       navigate('/admin/tours');
     } catch (err) {
-      notifyError(err.response?.data?.message || 'Failed to add tour.');
+      alert(`Error: ${err.response?.data?.message || 'Failed to add tour'}`);
     } finally {
       setLoading(false);
     }
@@ -113,7 +110,7 @@ const ManageTours = () => {
           <div>
             <label className={labelStyle}>Important Notes</label>
             <textarea
-              name="importantNotes"
+              name="notes"
               rows="3"
               placeholder="Any important information for travellers..."
               onChange={handleChange}
@@ -155,29 +152,27 @@ const ManageTours = () => {
             />
           </div>
 
-          {/* Capacity, Price, Tour Type */}
+          {/* Capacity, Price, Discount */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
               <label className={labelStyle}>Capacity / day</label>
               <input type="number" name="capacity" placeholder="60" onChange={handleChange} className={inputStyle} />
             </div>
             <div>
-              <label className={labelStyle}>Original Price (AUD)</label>
+              <label className={labelStyle}>Price (AUD)</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                <input type="number" name="originalPrice" placeholder="0" onChange={handleChange} className={`${inputStyle} pl-8`} required />
+                <input type="number" name="price" placeholder="0" onChange={handleChange} className={`${inputStyle} pl-8`} required />
               </div>
             </div>
             <div>
-              <label className={labelStyle}>Tour Type</label>
-              <select name="type" onChange={handleChange} className={inputStyle}>
-                <option value="day">Day Tour</option>
-                <option value="promo">Promo (10% off)</option>
-              </select>
+              <label className={labelStyle}>Discount (AUD)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                <input type="number" name="discount" placeholder="0" onChange={handleChange} className={`${inputStyle} pl-8`} />
+              </div>
             </div>
           </div>
-
-
 
           {/* Status */}
           <div className="max-w-xs">

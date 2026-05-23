@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
-import { useNotification } from '../context/NotificationContext';
-import { getImageUrl } from '../utils/imageUtils';
 
 const EditTour = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { notifySuccess, notifyError } = useNotification();
   const fileInputRef = useRef(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -19,10 +16,10 @@ const EditTour = () => {
     startDate: '',
     endDate: '',
     description: '',
-    importantNotes: '',
+    notes: '',
     capacity: '',
-    originalPrice: '',
-    type: 'day',
+    price: '',
+    discount: '',
     status: 'Available',
     imageFile: null,
   });
@@ -38,15 +35,15 @@ const EditTour = () => {
           startDate: data.startDate ? data.startDate.split('T')[0] : '',
           endDate: data.endDate ? data.endDate.split('T')[0] : '',
           description: data.description || '',
-          importantNotes: data.importantNotes || '',
+          notes: data.notes || '',
           capacity: data.capacity || '',
-          originalPrice: data.originalPrice || data.price || '',
-          type: data.type || 'day',
+          price: data.price || '',
+          discount: data.discount || '',
           status: data.status || 'Available',
           imageFile: null,
         });
         if (data.imageUrl) {
-          setPreview(getImageUrl(data.imageUrl));
+          setPreview(data.imageUrl.startsWith('http') ? data.imageUrl : `http://localhost:5001${data.imageUrl}`);
         }
       } catch (err) {
         console.error('Fetch error:', err);
@@ -75,10 +72,9 @@ const EditTour = () => {
       });
 
       await axiosInstance.put(`/api/tours/${id}`, data);
-      notifySuccess('Tour updated successfully.');
       navigate('/admin/tours');
     } catch (err) {
-      notifyError(`Update failed: ${err.response?.data?.message || 'Error'}`);
+      alert(`Update failed: ${err.response?.data?.message || 'Error'}`);
     } finally {
       setLoading(false);
     }
@@ -157,9 +153,9 @@ const EditTour = () => {
           <div>
             <label className={labelStyle}>Important Notes</label>
             <textarea
-              name="importantNotes"
+              name="notes"
               rows="3"
-              value={formData.importantNotes}
+              value={formData.notes}
               onChange={handleChange}
               className={`${inputStyle} resize-none`}
             />
@@ -199,29 +195,27 @@ const EditTour = () => {
             />
           </div>
 
-          {/* Capacity, Price, Tour Type */}
+          {/* Capacity, Price, Discount */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
               <label className={labelStyle}>Capacity / day</label>
               <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} className={inputStyle} />
             </div>
             <div>
-              <label className={labelStyle}>Original Price (AUD)</label>
+              <label className={labelStyle}>Price (AUD)</label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
-                <input type="number" name="originalPrice" value={formData.originalPrice} onChange={handleChange} className={`${inputStyle} pl-8`} required />
+                <input type="number" name="price" value={formData.price} onChange={handleChange} className={`${inputStyle} pl-8`} required />
               </div>
             </div>
             <div>
-              <label className={labelStyle}>Tour Type</label>
-              <select name="type" value={formData.type} onChange={handleChange} className={inputStyle}>
-                <option value="day">Day Tour</option>
-                <option value="promo">Promo (10% off)</option>
-              </select>
+              <label className={labelStyle}>Discount (AUD)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                <input type="number" name="discount" value={formData.discount} onChange={handleChange} className={`${inputStyle} pl-8`} />
+              </div>
             </div>
           </div>
-
-
 
           {/* Status */}
           <div className="max-w-xs">

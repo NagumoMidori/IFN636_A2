@@ -1,10 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl } from '../utils/imageUtils';
+
+const API_BASE = 'http://localhost:5001';
 
 const TourCard = ({ tour }) => {
   const navigate = useNavigate();
 
-  const imageUrl = getImageUrl(tour.imageUrl);
+  const imageUrl = tour.imageUrl?.startsWith('http')
+    ? tour.imageUrl
+    : `${API_BASE}${tour.imageUrl}`;
 
   return (
     <div
@@ -33,9 +36,6 @@ const TourCard = ({ tour }) => {
         </p>
         <p className="text-[15px] text-gray-900 mt-1">
           <span className="font-semibold">AUD ${tour.price}</span>
-          {tour.type === 'promo' && tour.originalPrice > tour.price && (
-            <span className="ml-1.5 text-sm text-gray-400 line-through">AUD ${tour.originalPrice}</span>
-          )}
           <span className="text-gray-500 font-normal"> / person</span>
         </p>
       </div>

@@ -1,11 +1,7 @@
 import axios from 'axios';
 
-export const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? ''
-  : 'http://localhost:5001';
-
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'http://localhost:5001',
    headers: {
     'Content-Type': 'application/json'
   }

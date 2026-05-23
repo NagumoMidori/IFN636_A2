@@ -5,31 +5,20 @@ import TourGrid from '../components/TourGrid';
 const Homepage = () => {
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    setLoading(true);
-
-    const timer = setTimeout(() => {
-      const fetchTours = async () => {
-        try {
-          const params = {};
-          if (searchTerm.trim()) {
-            params.search = searchTerm.trim();
-          }
-          const res = await axiosInstance.get('/api/tours', { params });
-          setTours(res.data);
-        } catch (err) {
-          console.error('Failed to fetch tours:', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchTours();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    const fetchTours = async () => {
+      try {
+        const res = await axiosInstance.get('/api/tours');
+        setTours(res.data);
+      } catch (err) {
+        console.error('Failed to fetch tours:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTours();
+  }, []);
 
   return (
     <div className="bg-white">
@@ -45,8 +34,6 @@ const Homepage = () => {
                 <input
                   type="text"
                   placeholder="Search destinations across Australia..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent"
                 />
               </div>
@@ -57,9 +44,7 @@ const Homepage = () => {
 
       {/* Tour Grid Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">
-          {searchTerm.trim() ? `Search results for "${searchTerm.trim()}"` : 'Popular Tours'}
-        </h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6">Popular Tours</h2>
         <TourGrid tours={tours} loading={loading} />
       </section>
     </div>

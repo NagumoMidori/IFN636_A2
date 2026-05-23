@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
-import { getImageUrl } from '../utils/imageUtils';
 
 const TourList = () => {
   const navigate = useNavigate();
@@ -50,13 +49,12 @@ const TourList = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left table-fixed">
             <colgroup>
-              <col className="w-[22%]" />
-              <col className="w-[13%]" />
-              <col className="w-[16%]" />
-              <col className="w-[9%]" />
-              <col className="w-[11%]" />
-              <col className="w-[9%]" />
+              <col className="w-[25%]" />
+              <col className="w-[14%]" />
+              <col className="w-[18%]" />
               <col className="w-[10%]" />
+              <col className="w-[12%]" />
+              <col className="w-[11%]" />
               <col className="w-[10%]" />
             </colgroup>
             <thead>
@@ -66,7 +64,6 @@ const TourList = () => {
                 <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
                 <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
                 <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -77,7 +74,7 @@ const TourList = () => {
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
                       <img
-                        src={getImageUrl(tour.imageUrl)}
+                        src={tour.imageUrl?.startsWith('http') ? tour.imageUrl : `http://localhost:5001${tour.imageUrl}`}
                         alt={tour.title}
                         className="w-12 h-12 rounded-lg object-cover bg-gray-100"
                         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop'; }}
@@ -95,15 +92,6 @@ const TourList = () => {
                   </td>
                   <td className="px-6 py-5 text-sm text-gray-500">{tour.capacity || '—'}</td>
                   <td className="px-6 py-5 text-sm font-medium text-gray-900">AUD ${tour.price}</td>
-                  <td className="px-6 py-5">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      tour.type === 'promo'
-                        ? 'bg-amber-50 text-amber-700'
-                        : 'bg-blue-50 text-blue-700'
-                    }`}>
-                      {tour.type === 'promo' ? 'Promo' : 'Day'}
-                    </span>
-                  </td>
                   <td className="px-6 py-5">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       tour.status === 'Available'

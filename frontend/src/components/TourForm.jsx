@@ -1,30 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
 import axiosInstance from '../axiosConfig';
 
 const TourForm = ({ editingTour, onSuccess, onClose }) => {
   const { user } = useAuth();
-  const { notifySuccess, notifyError, notifyWarning } = useNotification();
+  // 使用 useRef 來觸發隱藏的 file input
   const fileInputRef = useRef(null);
   
   // 1. 基本資料狀態 (對齊 Figma 欄位)
-  const [formData, setFormData] = useState({
-    title: '',
-    location: '',
-    startDate: '',
-    endDate: '',
-    description: '',
+  const [formData, setFormData] = useState({ 
+    title: '', 
+    location: '', 
+    startDate: '', 
+    endDate: '', 
+    description: '', 
     importantNotes: '',
     capacity: '',
-    originalPrice: '',
-    type: 'day',
+    price: '', 
+    discount: '',
     status: 'Available'
   });
 
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  // 2. 圖片相關狀態
+  const [imageFile, setImageFile] = useState(null); // 真正的圖片檔案 (上傳用)
+  const [imagePreview, setImagePreview] = useState(null); // 圖片的網址 (預覽用)
 
   useEffect(() => {
     if (editingTour) {
@@ -42,10 +41,10 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
       }
     } else {
       // 新增模式：清空所有狀態
-      setFormData({
-        title: '', location: '', startDate: '', endDate: '',
-        description: '', importantNotes: '', capacity: '',
-        originalPrice: '', type: 'day', status: 'Available'
+      setFormData({ 
+        title: '', location: '', startDate: '', endDate: '', 
+        description: '', importantNotes: '', capacity: '', 
+        price: '', discount: '', status: 'Available' 
       });
       setImageFile(null);
       setImagePreview(null);
@@ -69,7 +68,7 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user?.token) { notifyWarning('Please login again.'); return; }
+    if (!user?.token) return alert("Please login again.");
 
     try {
       // 🔴 關鍵：使用 FormData 來處理包含檔案的表單
@@ -107,26 +106,25 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
         await axiosInstance.post('/api/tours', data, config);
       }
       
-      notifySuccess(editingTour ? 'Tour updated successfully.' : 'Tour created successfully.');
-      onSuccess();
+      alert('Success!');
+      onSuccess(); // 成功後關閉彈窗並刷新列表
     } catch (error) {
       console.error(error);
-      notifyError('Save failed: ' + (error.response?.data?.message || 'Check Server Logs'));
+      alert('Save failed: ' + (error.response?.data?.message || 'Check Server Logs'));
     }
   };
 
   const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this tour package?")) return;
     try {
       await axiosInstance.delete(`/api/tours/${editingTour._id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
-      notifySuccess('Deleted successfully.');
+      alert('Deleted Successfully!');
       onSuccess();
     } catch (error) {
       console.error(error);
-      notifyError('Delete failed.');
-    } finally {
-      setConfirmingDelete(false);
+      alert('Delete failed.');
     }
   };
 
@@ -275,41 +273,32 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
           />
         </div>
 
-        {/* Price & Tour Type (並排設計) */}
+        {/* Price & Discount (Figma 並排設計) */}
         <div className="flex space-x-4">
           <div className="flex-1 space-y-2">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Price (in AUD)</label>
             <div className="relative">
               {/* 貨幣符號固定在左側 */}
               <span className="absolute left-4 top-[17px] text-gray-400 font-bold">$</span>
-              <input
-                type="number"
-                placeholder="Enter price"
-                value={formData.originalPrice}
-                onChange={e => setFormData({...formData, originalPrice: e.target.value})}
-                className="w-full p-4 pl-9 bg-white border border-gray-100 rounded-xl outline-none shadow-sm placeholder-gray-300"
-                required
+              <input 
+                type="number" 
+                placeholder="Enter price" 
+                value={formData.price} 
+                onChange={e => setFormData({...formData, price: e.target.value})} 
+                className="w-full p-4 pl-9 bg-white border border-gray-100 rounded-xl outline-none shadow-sm placeholder-gray-300" 
+                required 
               />
             </div>
           </div>
           <div className="flex-1 space-y-2">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Tour Type</label>
-            <div className="relative">
-              <select
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full p-4 bg-white border border-gray-100 rounded-xl appearance-none outline-none shadow-sm text-gray-700 cursor-pointer"
-              >
-                <option value="day">Day Tour</option>
-                <option value="promo">Promo (10% off)</option>
-              </select>
-              {/* 下拉箭頭 Icon */}
-              <div className="absolute right-4 top-5 pointer-events-none text-emerald-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Discount (%)</label>
+            <input 
+              type="number" 
+              placeholder="Enter discount" 
+              value={formData.discount} 
+              onChange={e => setFormData({...formData, discount: e.target.value})} 
+              className="w-full p-4 bg-white border border-gray-100 rounded-xl outline-none shadow-sm placeholder-gray-300" 
+            />
           </div>
         </div>
 
@@ -343,24 +332,15 @@ const TourForm = ({ editingTour, onSuccess, onClose }) => {
             {editingTour ? 'Update Changes' : 'Submit'}
           </button>
           
-          {editingTour && !confirmingDelete && (
-            <button
-              type="button"
-              onClick={() => setConfirmingDelete(true)}
+          {/* 🔴 刪除按鈕只在編輯模式出現 */}
+          {editingTour && (
+            <button 
+              type="button" 
+              onClick={handleDelete} 
               className="w-full text-red-500 font-bold py-3 mt-2 hover:bg-red-50 rounded-xl transition-colors"
             >
               Delete Tour Package
             </button>
-          )}
-          {editingTour && confirmingDelete && (
-            <div className="flex gap-3 mt-2">
-              <button type="button" onClick={() => setConfirmingDelete(false)} className="flex-1 py-3 font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
-                Cancel
-              </button>
-              <button type="button" onClick={handleDelete} className="flex-1 py-3 font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors">
-                Confirm delete
-              </button>
-            </div>
           )}
         </div>
       </form>

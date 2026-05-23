@@ -12,7 +12,10 @@ import TourDetail from './pages/TourDetail';
 import Cart from './pages/Cart';
 import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
+import EditBooking from './pages/EditBooking';
+import CancelBooking from './pages/CancelBooking';
 import UserHome from './pages/UserHome';
+import Profile from './pages/Profile';
 
 import AdminHome from './pages/AdminHome';
 import TourList from './pages/TourList';
@@ -40,7 +43,10 @@ function App() {
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+          <Route path="/edit-booking/:id" element={<ProtectedRoute><EditBooking /></ProtectedRoute>} />
+          <Route path="/cancel-booking/:id" element={<ProtectedRoute><CancelBooking /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><UserHome /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         </Route>
 
         {/* B-end: Admin Layout */}

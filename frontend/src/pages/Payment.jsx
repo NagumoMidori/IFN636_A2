@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
 import { useCart } from '../context/cartContext';
-import { useNotification } from '../context/NotificationContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')}`;
@@ -11,7 +10,6 @@ const Payment = () => {
   const navigate = useNavigate();
   // From Context get cart information and clear method
   const { cart, clearCart } = useCart();
-  const { notifySuccess, notifyError, notifyWarning } = useNotification();
   const items = useMemo(() => cart?.items || [], [cart?.items]);
   const [processing, setProcessing] = useState(false);
 
@@ -25,14 +23,8 @@ const Payment = () => {
   );
 
   const handlePay = async () => {
-    if (items.length === 0) {
-      notifyWarning('Please add at least one tour before checkout.');
-      navigate('/cart');
-      return;
-    }
-
     if (hasInvalidItems) {
-      notifyWarning('Please return to your shopping cart and fill in all the dates and phone numbers for your trip.');
+      alert('Please return to your shopping cart and fill in all the dates and phone numbers for your trip.');
       navigate('/cart');
       return;
     }
@@ -40,13 +32,25 @@ const Payment = () => {
     setProcessing(true);
 
     try {
-      await axiosInstance.post('/api/orders');
-      clearCart();
+      // Iterate through the projects to create appointments 
+      for (const item of items) {
+        await axiosInstance.post('/api/bookings', {
+          tour: item.tour?._id, 
+          tourDate: item.tourDate,
+          quantity: Number(item.quantity),
+          totalPrice: Number(item.tour?.price * item.quantity),
+          personalInfo: item.personalInfo,
+        });
+      }
 
-      notifySuccess('Payment successful! Your order has been created.');
+      // Clear the cart in both the backend and frontend after successful checkout.
+      await axiosInstance.delete('/api/cart'); 
+      clearCart(); 
+      
+      alert('Payment successful! Your appointment has been made.');
       navigate('/my-bookings');
     } catch (err) {
-      notifyError(`Payment failed: ${err.response?.data?.message || 'Please try again later.'}`);
+      alert(`Payment failed: ${err.response?.data?.message || 'Please try again later.'}`);
     } finally {
       setProcessing(false);
     }
@@ -62,7 +66,7 @@ const Payment = () => {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/" className="rounded-lg bg-brand-600 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700">
-              Explore tours
+              Explore the trop
             </Link>
             <Link to="/cart" className="rounded-lg border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
               Check cart

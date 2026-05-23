@@ -1,228 +1,159 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axiosConfig';
-import { useNotification } from '../context/NotificationContext';
-import { getImageUrl } from '../utils/imageUtils';
-
-const formatDate = (value) => {
-  if (!value) return 'N/A';
-  return new Date(value).toLocaleString('en-AU', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
-
-const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')}`;
-
-const statusColor = {
-  Confirmed: 'bg-green-50 text-green-700',
-  Pending: 'bg-amber-50 text-amber-700',
-  Cancelled: 'bg-red-50 text-red-700',
-};
-
-const labelStyle = 'text-sm text-gray-500';
-const valueStyle = 'mt-0.5 text-sm font-medium text-gray-900';
 
 const AdminOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { notifySuccess, notifyError } = useNotification();
-  const [order, setOrder] = useState(null);
+  const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [statusSaving, setStatusSaving] = useState(false);
-
-  const fetchOrder = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get(`/api/orders/${id}`);
-      setOrder(response.data);
-    } catch (err) {
-      console.error('Failed to fetch order:', err);
-      setOrder(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
 
   useEffect(() => {
-    fetchOrder();
-  }, [fetchOrder]);
-
-  const handleStatusChange = async (status) => {
-    setStatusSaving(true);
-    try {
-      const response = await axiosInstance.patch(`/api/orders/${id}/status`, { status });
-      setOrder(response.data);
-      notifySuccess(`Order status updated to ${status}.`);
-    } catch (err) {
-      notifyError(err.response?.data?.message || 'Failed to update order status.');
-    } finally {
-      setStatusSaving(false);
-    }
-  };
+    axiosInstance.get(`/api/bookings/${id}`)
+      .then((res) => setBooking(res.data))
+      .catch((err) => console.error('Failed to fetch order:', err))
+      .finally(() => setLoading(false));
+  }, [id]);
 
   if (loading) {
     return (
       <div className="p-8">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 rounded bg-gray-200" />
-          <div className="h-[500px] max-w-5xl rounded-xl bg-gray-200" />
+          <div className="h-8 bg-gray-200 rounded w-48" />
+          <div className="h-[500px] bg-gray-200 rounded-xl max-w-4xl" />
         </div>
       </div>
     );
   }
 
-  if (!order) {
+  if (!booking) {
     return (
       <div className="p-8">
         <p className="text-gray-500">Order not found.</p>
-        <button
-          onClick={() => navigate('/admin/orders')}
-          className="mt-4 text-sm font-medium text-emerald-600 hover:text-emerald-700"
-        >
+        <button onClick={() => navigate('/admin/orders')} className="mt-4 text-sm text-emerald-600 hover:text-emerald-700 font-medium">
           Back to Orders
         </button>
       </div>
     );
   }
 
-  const firstItem = order.items?.[0];
-  const primaryContact = firstItem?.personalInfo || {};
+  const tour = booking.tour;
+  const imageUrl = tour?.imageUrl?.startsWith('http') ? tour.imageUrl : `http://localhost:5001${tour?.imageUrl}`;
+
+  const statusColor = {
+    Confirmed: 'bg-green-50 text-green-700',
+    Pending: 'bg-amber-50 text-amber-700',
+    Cancelled: 'bg-red-50 text-red-700',
+  };
+
+  const labelStyle = 'text-sm text-gray-500';
+  const valueStyle = 'text-sm font-medium text-gray-900 mt-0.5';
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-center justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Order Detail</h1>
-          <p className="mt-1 text-sm text-gray-500">Order ID: {order._id}</p>
+          <p className="text-sm text-gray-500 mt-1">Order ID: {booking._id}</p>
         </div>
         <button
           onClick={() => navigate('/admin/orders')}
-          className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+          className="text-sm font-medium text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
         >
           Back to Orders
         </button>
       </div>
 
-      <div className="max-w-5xl space-y-6">
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <h2 className="mb-4 text-base font-semibold text-gray-900">Customer Information</h2>
-              <div className="grid gap-x-8 gap-y-4 sm:grid-cols-3">
-                <div>
-                  <p className={labelStyle}>Full Name</p>
-                  <p className={valueStyle}>{primaryContact.fullName || order.user?.username || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className={labelStyle}>Email</p>
-                  <p className={valueStyle}>{primaryContact.email || order.user?.email || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className={labelStyle}>Phone</p>
-                  <p className={valueStyle}>{primaryContact.phone || 'N/A'}</p>
-                </div>
+      <div className="max-w-4xl space-y-6">
+        {/* Tour Info */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Tour Information</h2>
+          <div className="flex items-start gap-5">
+            <img
+              src={imageUrl}
+              alt={tour?.title}
+              className="w-28 h-20 rounded-lg object-cover bg-gray-100 flex-shrink-0"
+              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=140&fit=crop'; }}
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-4 flex-1">
+              <div>
+                <p className={labelStyle}>Tour Name</p>
+                <p className={valueStyle}>{tour?.title || 'N/A'}</p>
+              </div>
+              <div>
+                <p className={labelStyle}>Location</p>
+                <p className={valueStyle}>{tour?.location || 'N/A'}</p>
+              </div>
+              <div>
+                <p className={labelStyle}>Unit Price</p>
+                <p className={valueStyle}>AUD ${tour?.price || 0}</p>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="min-w-[220px] rounded-xl bg-gray-50 p-4">
-              <p className={labelStyle}>Order Total</p>
-              <p className="mt-1 text-2xl font-bold text-gray-900">{formatPrice(order.totalAmount)}</p>
-              <span className={`mt-3 inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColor[order.status] || statusColor.Pending}`}>
-                {order.status || 'Pending'}
+        {/* Customer Info */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Customer Information</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-4">
+            <div>
+              <p className={labelStyle}>Full Name</p>
+              <p className={valueStyle}>{booking.personalInfo?.fullName || booking.user?.username || 'N/A'}</p>
+            </div>
+            <div>
+              <p className={labelStyle}>Email</p>
+              <p className={valueStyle}>{booking.personalInfo?.email || 'N/A'}</p>
+            </div>
+            <div>
+              <p className={labelStyle}>Phone</p>
+              <p className={valueStyle}>{booking.personalInfo?.phone || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Booking Details */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Booking Details</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-4">
+            <div>
+              <p className={labelStyle}>Tour Date</p>
+              <p className={valueStyle}>
+                {booking.tourDate ? new Date(booking.tourDate).toLocaleDateString() : 'N/A'}
+              </p>
+            </div>
+            <div>
+              <p className={labelStyle}>Guests</p>
+              <p className={valueStyle}>{booking.quantity || 1}</p>
+            </div>
+            <div>
+              <p className={labelStyle}>Total Price</p>
+              <p className={valueStyle}>AUD ${booking.totalPrice || 0}</p>
+            </div>
+            <div>
+              <p className={labelStyle}>Status</p>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-0.5 ${statusColor[booking.status] || statusColor.Pending}`}>
+                {booking.status || 'Pending'}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-base font-semibold text-gray-900">Order Items</h2>
-            <p className="text-sm text-gray-500">{order.items?.length || 0} item(s)</p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed text-left">
-              <colgroup>
-                <col className="w-[36%]" />
-                <col className="w-[18%]" />
-                <col className="w-[14%]" />
-                <col className="w-[16%]" />
-                <col className="w-[16%]" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="py-3 pr-4 text-xs font-medium uppercase tracking-wider text-gray-500">Tour</th>
-                  <th className="py-3 pr-4 text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
-                  <th className="py-3 pr-4 text-xs font-medium uppercase tracking-wider text-gray-500">Guests</th>
-                  <th className="py-3 pr-4 text-xs font-medium uppercase tracking-wider text-gray-500">Unit Price</th>
-                  <th className="py-3 text-xs font-medium uppercase tracking-wider text-gray-500">Item Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {(order.items || []).map((item) => (
-                  <tr key={item._id}>
-                    <td className="py-4 pr-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={getImageUrl(item.tour?.imageUrl)}
-                          alt={item.tour?.title || 'Tour'}
-                          className="h-12 w-16 rounded-lg bg-gray-100 object-cover"
-                          onError={(event) => {
-                            event.currentTarget.src = '/images/bondi_beach.jpg';
-                          }}
-                        />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-gray-900">{item.tour?.title || 'N/A'}</p>
-                          <p className="truncate text-xs text-gray-500">{item.tour?.location || 'Location unavailable'}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 pr-4 text-sm text-gray-500">{item.tourDate || 'N/A'}</td>
-                    <td className="py-4 pr-4 text-sm text-gray-500">{item.quantity || 1}</td>
-                    <td className="py-4 pr-4 text-sm text-gray-900">{formatPrice(item.unitPrice)}</td>
-                    <td className="py-4 text-sm font-medium text-gray-900">{formatPrice(item.totalPrice)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-base font-semibold text-gray-900">Status Management</h2>
-          <div className="flex flex-wrap gap-3">
-            {['Pending', 'Confirmed', 'Cancelled'].map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => handleStatusChange(status)}
-                disabled={statusSaving || order.status === status}
-                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
-              >
-                {order.status === status ? `${status} selected` : `Set ${status}`}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-base font-semibold text-gray-900">Timeline</h2>
-          <div className="grid gap-x-8 gap-y-4 sm:grid-cols-3">
+        {/* Timestamps */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">Timeline</h2>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <div>
               <p className={labelStyle}>Created At</p>
-              <p className={valueStyle}>{formatDate(order.createdAt)}</p>
+              <p className={valueStyle}>
+                {booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A'}
+              </p>
             </div>
             <div>
               <p className={labelStyle}>Last Updated</p>
-              <p className={valueStyle}>{formatDate(order.updatedAt)}</p>
-            </div>
-            <div>
-              <p className={labelStyle}>Payment</p>
-              <p className={valueStyle}>{order.paymentStatus || 'Paid'}</p>
+              <p className={valueStyle}>
+                {booking.updatedAt ? new Date(booking.updatedAt).toLocaleString() : 'N/A'}
+              </p>
             </div>
           </div>
         </div>

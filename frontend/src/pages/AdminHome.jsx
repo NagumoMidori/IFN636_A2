@@ -2,15 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../axiosConfig";
 import { useAuth } from "../context/AuthContext";
-import { getImageUrl } from "../utils/imageUtils";
-
-const summariseOrderTours = (order) => {
-  const items = order.items || [];
-  if (items.length === 0) return "N/A";
-  const firstTitle = items[0].tour?.title || "Unknown tour";
-  const extra = items.length - 1;
-  return extra > 0 ? `${firstTitle} + ${extra} more` : firstTitle;
-};
 
 const AdminHome = () => {
   const { user } = useAuth();
@@ -24,7 +15,7 @@ const AdminHome = () => {
       try {
         const [toursRes, ordersRes] = await Promise.all([
           axiosInstance.get("/api/tours"),
-          axiosInstance.get("/api/orders/all"),
+          axiosInstance.get("/api/bookings/all"),
         ]);
         setTours(toursRes.data);
         setOrders(ordersRes.data);
@@ -185,7 +176,11 @@ const AdminHome = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={getImageUrl(tour.imageUrl)}
+                        src={
+                          tour.imageUrl?.startsWith("http")
+                            ? tour.imageUrl
+                            : `http://localhost:5001${tour.imageUrl}`
+                        }
                         alt={tour.title}
                         className="w-10 h-10 rounded-lg object-cover bg-gray-100"
                         onError={(e) => {
@@ -265,22 +260,21 @@ const AdminHome = () => {
               {orders.slice(0, 10).map((order) => (
                 <tr
                   key={order._id}
-                  onClick={() => navigate("/admin/orders")}
-                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="hover:bg-gray-50 transition-colors"
                 >
                   <td className="px-6 py-5 text-sm font-medium text-gray-900">
-                    {order.user?.username || "N/A"}
+                    {order.contactName || order.user?.username || "N/A"}
                   </td>
                   <td className="px-6 py-5 text-sm text-gray-500">
-                    {summariseOrderTours(order)}
+                    {order.tour?.title || "N/A"}
                   </td>
                   <td className="px-6 py-5 text-sm text-gray-500">
-                    {order.createdAt
-                      ? new Date(order.createdAt).toLocaleDateString()
+                    {order.selectedDate
+                      ? new Date(order.selectedDate).toLocaleDateString()
                       : "N/A"}
                   </td>
                   <td className="px-6 py-5 text-sm font-medium text-gray-900">
-                    AUD ${Number(order.totalAmount || 0).toLocaleString("en-AU")}
+                    AUD ${order.totalPrice || 0}
                   </td>
                   <td className="px-6 py-4">
                     <span

@@ -28,25 +28,25 @@ const UserHome = () => {
   const { cart } = useCart();
   
   const [tours, setTours] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Derive cart item count from the centralized state
   const cartCount = cart?.items?.length || 0;
 
 
-  // Fetch tours and user orders on component mount
+  // Fetch tours and user bookings on component mount
 
   useEffect(() => {
     const fetchDashboard = async () => {
       setLoading(true);
       try {
-        const [toursResponse, ordersResponse] = await Promise.all([
+        const [toursResponse, bookingsResponse] = await Promise.all([
           axiosInstance.get('/api/tours'),
-          axiosInstance.get('/api/orders/my'),
+          axiosInstance.get('/api/bookings/my-bookings'),
         ]);
         setTours(toursResponse.data);
-        setOrders(ordersResponse.data);
+        setBookings(bookingsResponse.data);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
@@ -56,17 +56,9 @@ const UserHome = () => {
     fetchDashboard();
   }, []);
 
-  // Filter top 3 recent orders and top 4 recommended tours for the dashboard view
-  const recentOrders = useMemo(() => orders.slice(0, 3), [orders]);
+  // Filter top 3 recent bookings and top 4 recommended tours for the dashboard view
+  const recentBookings = useMemo(() => bookings.slice(0, 3), [bookings]);
   const recommendedTours = useMemo(() => tours.slice(0, 4), [tours]);
-
-  const summariseOrderTours = (order) => {
-    const items = order.items || [];
-    if (items.length === 0) return 'No tour items';
-    const firstTitle = items[0].tour?.title || 'Unknown tour';
-    const extra = items.length - 1;
-    return extra > 0 ? `${firstTitle} + ${extra} more` : firstTitle;
-  };
 
   return (
     <section className="bg-white">
@@ -103,8 +95,8 @@ const UserHome = () => {
             <p className="mt-2 text-3xl font-semibold text-gray-900">{cartCount}</p>
           </div>
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Total Orders</p>
-            <p className="mt-2 text-3xl font-semibold text-gray-900">{orders.length}</p>
+            <p className="text-sm text-gray-500">Total Bookings</p>
+            <p className="mt-2 text-3xl font-semibold text-gray-900">{bookings.length}</p>
           </div>
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <p className="text-sm text-gray-500">Available Tours</p>
@@ -151,31 +143,31 @@ const UserHome = () => {
             )}
           </div>
 
-          {/* Sidebar: Recent Orders */}
+          {/* Sidebar: Recent Bookings */}
           <aside className="h-fit rounded-2xl border border-gray-200 bg-white p-6 shadow-sm lg:sticky lg:top-28">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Recent Bookings</h2>
               <Link to="/my-bookings" className="text-sm font-semibold text-gray-700 hover:text-gray-900">Manage</Link>
             </div>
 
-            {recentOrders.length === 0 ? (
+            {recentBookings.length === 0 ? (
               <div className="mt-6 rounded-xl bg-gray-50 p-5 text-sm leading-6 text-gray-500">
-                No orders yet. Start your journey by adding tours to the cart and checking out.
+                No active bookings yet. Start your journey by adding tours to the cart and checking out.
               </div>
             ) : (
               <div className="mt-5 space-y-4">
-                {recentOrders.map((order) => (
+                {recentBookings.map((booking) => (
                   <button
-                    key={order._id}
+                    key={booking._id}
                     type="button"
                     onClick={() => navigate('/my-bookings')}
                     className="block w-full rounded-xl border border-gray-100 p-4 text-left hover:bg-gray-50"
                   >
                     <p className="truncate text-sm font-semibold text-gray-900">
-                      {summariseOrderTours(order)}
+                      {booking.tour?.title || 'Unknown Tour'}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">{formatDate(order.createdAt)}</p>
-                    <p className="mt-2 text-sm font-semibold text-gray-900">{formatPrice(order.totalAmount)}</p>
+                    <p className="mt-1 text-xs text-gray-500">{formatDate(booking.tourDate)}</p>
+                    <p className="mt-2 text-sm font-semibold text-gray-900">{formatPrice(booking.totalPrice)}</p>
                   </button>
                 ))}
               </div>

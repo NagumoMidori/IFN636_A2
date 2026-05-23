@@ -1,18 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/cartContext';
-import { useNotification } from '../context/NotificationContext';
 import { getImageUrl } from '../utils/imageUtils';
 
 const formatPrice = (value) => `AUD ${Number(value || 0).toLocaleString('en-AU')}`;
 
 const Cart = () => {
   const navigate = useNavigate();
-
+  
   const { cart, removeFromCart, updateCartItem, loading } = useCart();
-  const { notifyWarning } = useNotification();
-  const [confirmingRemove, setConfirmingRemove] = useState(null);
-
+  
   const items = useMemo(() => cart?.items || [], [cart?.items]);
 
   const cartTotal = useMemo(
@@ -29,15 +26,17 @@ const Cart = () => {
     updateCartItem(cartItemId, updates);
   };
 
+  // call Context method to delete item from database
   const handleRemove = (cartItemId) => {
-    removeFromCart(cartItemId);
-    setConfirmingRemove(null);
+    if (window.confirm('Are you sure to remove this trip?')) {
+      removeFromCart(cartItemId);
+    }
   };
 
   const handleCheckout = () => {
     if (items.length === 0) return;
     if (hasInvalidItems) {
-      notifyWarning('Please fill in the dates and contact numbers for all your trips before checkout.');
+      alert('Please fill in the dates and contact numbers for all your trips before checkout.');
       return;
     }
     navigate('/payment');
@@ -102,32 +101,13 @@ const Cart = () => {
                         <h2 className="text-xl font-semibold text-gray-900">{item.tour?.title}</h2>
                         <p className="mt-1 text-sm text-gray-500">{item.tour?.location}</p>
                       </div>
-                      {confirmingRemove === item._id ? (
-                        <div className="flex gap-2 self-start">
-                          <button
-                            type="button"
-                            onClick={() => setConfirmingRemove(null)}
-                            className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemove(item._id)}
-                            className="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                          >
-                            Remove trip
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setConfirmingRemove(item._id)}
-                          className="self-start rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-                        >
-                          remove
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemove(item._id)}
+                        className="self-start rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                      >
+                        remove
+                      </button>
                     </div>
 
                     <div className="mt-5 grid gap-4 sm:grid-cols-3">
