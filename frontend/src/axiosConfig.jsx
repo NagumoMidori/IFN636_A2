@@ -10,24 +10,23 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json'
   }
 });
-//dfj
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const rawData = localStorage.getItem('userInfo');
-    
+
     if (rawData) {
       try {
         const userInfo = JSON.parse(rawData);
         if (userInfo && userInfo.token) {
           config.headers.Authorization = `Bearer ${userInfo.token}`;
-          // 這行如果印出來，代表成功了
-          console.log("🚀 Axios: Token 已成功注入 Header");
+          console.log("Axios: Token successfully injected into Header");
         }
       } catch (err) {
-        console.error("Axios: 解析 userInfo 失敗", err);
+        console.error("Axios: Failed to parse userInfo", err);
       }
     } else {
-      console.warn("🛰️ Axios: localStorage 找不到 userInfo，無法注入 Token");
+      console.warn("Axios: userInfo not found in localStorage, cannot inject Token");
     }
     return config;
   },

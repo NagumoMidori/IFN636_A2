@@ -10,7 +10,7 @@ export const CartProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const { notifySuccess, notifyError } = useNotification();
 
-    // 1. 從後端獲取購物車資料 get cart information from backend
+    // 1. Fetch cart from backend
     const fetchCart = async () => {
         try {
             const { data } = await axiosInstance.get('/api/cart');
@@ -22,7 +22,7 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // 2. 加入購物車 add to cart
+    // 2. Add to cart
     const addToCart = async (tourId, quantity, tourDate, personalInfo) => {
         try{    
             const { data } = await axiosInstance.post('/api/cart/add', { 
@@ -38,7 +38,7 @@ export const CartProvider = ({ children }) => {
     };
     // 3. update item
     const updateCartItem = async (cartItemId, updates) => {
-        // ✅ 加入安全性檢查：確保 cart 存在且 items 是陣列
+        // Safety check: ensure cart exists and items is an array
         if (!cart || !Array.isArray(cart.items)) {
             console.warn("Cart is not initialized yet.");
             return;
@@ -61,7 +61,7 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // 4. 刪除項目 delete item
+    // 4. Delete item
     const removeFromCart = async (cartItemId) => {
         try {
             const { data } = await axiosInstance.delete(`/api/cart/${cartItemId}`);

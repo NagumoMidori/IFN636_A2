@@ -3,7 +3,7 @@ const router = express.Router();
 const cartController = require('../controllers/cartController');
 const { protect } = require('../middleware/authMiddleware');
 
-// 所有購物車操作都需要登入 (protect) Every cart action need to login to process
+// All cart actions require authentication
 router.get('/', protect, cartController.getCart);
 router.post('/add', protect, cartController.addToCart);
 router.delete('/:cartItemId', protect, cartController.removeFromCart);
