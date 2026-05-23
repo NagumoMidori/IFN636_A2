@@ -177,6 +177,8 @@ const ManageTours = () => {
             </div>
           </div>
 
+
+
           {/* Status */}
           <div className="max-w-xs">
             <label className={labelStyle}>Status</label>

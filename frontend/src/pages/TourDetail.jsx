@@ -31,6 +31,8 @@ const TourDetail = () => {
 
   
 
+  
+
   useEffect(() => {
     const fetchTour = async () => {
       setLoading(true);

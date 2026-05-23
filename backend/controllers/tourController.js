@@ -1,4 +1,5 @@
 const Tour = require('../models/Tour');
+const TourFactory = require('../factories/tourFactory'); // import factory
 
 const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -25,96 +26,101 @@ exports.getTours = async (req, res) => {
     }
 };
 
-// @desc    獲取單一行程詳情
+// @desc    get specific tour details
 // @route   GET /api/tours/:id
 exports.getTourById = async (req, res) => {
     try {
         const tour = await Tour.findById(req.params.id);
         if (!tour) {
-            return res.status(404).json({ message: '找不到該行程' });
+            return res.status(404).json({ message: 'Cannot find tours.' });
         }
         res.json(tour);
     } catch (err) {
-        res.status(500).json({ message: "無效的行程 ID" });
+        res.status(500).json({ message: "Invalid tour ID" });
     }
 };
 
-// @desc    新增行程 (Admin Only)
+// @desc    add tours (Admin Only)
 // @route   POST /api/tours
 exports.createTour = async (req, res) => {
     try {
-        console.log("📥 [Create] Received Body:", req.body);
-        console.log("🖼️ [Create] Received File:", req.file);
+        console.log("[Create] Received Body:", req.body);
+        console.log("[Create] Received File:", req.file);
+
+        const { type, ...restBody } = req.body;
 
         const tourData = {
-            ...req.body,
-            // 如果 Multer 有抓到檔案，儲存路徑；否則留空或用預設圖
+            ...restBody,
             imageUrl: req.file ? `/uploads/${req.file.filename}` : req.body.imageUrl || '../../../public/images/bondi_beach.webp'
         };
 
-        const tour = new Tour(tourData);
+        // Use factory to create instances
+        const tour = TourFactory.createTour(type, tourData);
+        
         const createdTour = await tour.save();
         
-        console.log("✅ [Create] Success:", createdTour._id);
+        console.log("[Create] Success:", createdTour._id);
         res.status(201).json(createdTour);
     } catch (err) {
-        console.error("❌ [Create] Error:", err.message);
-        res.status(400).json({ message: "新增失敗: " + err.message });
+        console.error("[Create] Error:", err.message);
+        res.status(400).json({ message: "Create failed: " + err.message });
     }
 };
 
-// @desc    更新行程 (Admin Only)
+// @desc    update tours (Admin Only)
 // @route   PUT /api/tours/:id
 exports.updateTour = async (req, res) => {
     try {
-        console.log(`Update] ID: ${req.params.id}`);
+        console.log(`🔄 [Update via Factory + Schema Hook] ID: ${req.params.id}`);
         
-        const updateData = { ...req.body };
+        const { type, ...restBody } = req.body;
+        const updateData = { ...restBody };
 
-        // 如果更新時有上傳新照片，覆蓋 imageUrl
         if (req.file) {
             updateData.imageUrl = `/uploads/${req.file.filename}`;
-            console.log("🖼️ [Update] New image uploaded:", updateData.imageUrl);
         }
 
+        // 1. Have the factory inject any missing important notes and correct the type.
+        const processedUpdateData = TourFactory.applyUpdateData(type, updateData);
+
+        // 2. Write in database
         const updatedTour = await Tour.findByIdAndUpdate(
             req.params.id,
-            { $set: updateData },
-            { new: true, runValidators: true }
+            { $set: processedUpdateData },
+            { new: true, runValidators: true } 
         );
 
         if (!updatedTour) {
-            return res.status(404).json({ message: '找不到行程，更新失敗' });
+            return res.status(404).json({ message: 'Update failed, tour not found.' });
         }
 
-        console.log("✅ [Update] Success");
+        console.log("[Update] Success. Price auto-calculated by Schema Middleware.");
         res.json(updatedTour);
     } catch (err) {
-        console.error("❌ [Update] Error:", err.message);
-        res.status(400).json({ message: "更新失敗: " + err.message });
+        console.error("[Update] Error:", err.message);
+        res.status(400).json({ message: "Update failed: " + err.message });
     }
 };
 
-// @desc    刪除行程 (Admin Only)
+// @desc    delete tours (Admin Only)
 // @route   DELETE /api/tours/:id
 exports.deleteTour = async (req, res) => {
     try {
-        console.log(`🗑️ [Delete] Attempting to delete ID: ${req.params.id}`);
+        console.log(`[Delete] Attempting to delete ID: ${req.params.id}`);
         
         const tour = await Tour.findById(req.params.id);
 
         if (!tour) {
-            console.log("⚠️ [Delete] Tour not found");
-            return res.status(404).json({ message: '找不到該行程，無法刪除' });
+            console.log("[Delete] Tour not found");
+            return res.status(404).json({ message: 'The trip cannot be found and cannot be deleted.' });
         }
 
-        // 使用 deleteOne 或 findByIdAndDelete
         await Tour.findByIdAndDelete(req.params.id);
 
-        console.log("✅ [Delete] Successful");
-        res.json({ message: '行程已成功刪除' });
+        console.log("[Delete] Successful");
+        res.json({ message: 'The tour has been successfully deleted.' });
     } catch (err) {
-        console.error("❌ [Delete] Error:", err.message);
-        res.status(500).json({ message: "伺服器錯誤，刪除失敗" });
+        console.error("[Delete] Error:", err.message);
+        res.status(500).json({ message: "Server error, deletion failed." });
     }
 };
