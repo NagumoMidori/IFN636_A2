@@ -13,5 +13,6 @@ router.get('/:id', tourController.getTourById);
 router.post('/', protect, adminOnly, upload.single('imageFile'), tourController.createTour); 
 router.put('/:id', protect, adminOnly, upload.single('imageFile'), tourController.updateTour);
 router.delete('/:id', protect, adminOnly, tourController.deleteTour);
+router.patch('/:id', protect, adminOnly, upload.single('imageFile'), tourController.updateTour);
 
 module.exports = router;

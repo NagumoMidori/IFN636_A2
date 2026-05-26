@@ -22,7 +22,7 @@ const registerUser = async (req, res) => {
             email, 
             password, 
             phone,
-            role: 'user' // 預設註冊身份為一般用戶
+            role: req.body.role || 'user' // 預設註冊身份為一般用戶
         });
 
         res.status(201).json({ 
