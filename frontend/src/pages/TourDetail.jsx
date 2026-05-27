@@ -251,7 +251,7 @@ const TourDetail = () => {
           </p>
         </div>
 
-        <TourImageGallery title={tour.title} imageUrl={tour.imageUrl} />
+        <TourImageGallery title={tour.title} location={tour.location} imageUrl={tour.imageUrl} />
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="min-w-0">

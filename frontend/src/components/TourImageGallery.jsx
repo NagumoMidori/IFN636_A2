@@ -3,11 +3,105 @@ import { getImageUrl } from '../utils/imageUtils';
 
 const FALLBACK = '/images/bondi_beach.jpg';
 
-const TourImageGallery = ({ title, imageUrl }) => {
+const GALLERY_BY_PLACE = {
+  Adelaide: [
+    '/images/Adelaide/Aus-Adelaide-CentralMarket.webp',
+    '/images/Adelaide/Aus-Adelaide-Oval.webp',
+    '/images/Adelaide/Aus-Adelaide-RiverTorrens.webp',
+    '/images/Adelaide/Aus-Adelaide-RundleMall.webp',
+    '/images/Adelaide/Aus-Adelaide-TorrensWeir.webp',
+  ],
+  Brisbane: [
+    '/images/Brisbane/Aus-Brisbane-CBD.webp',
+    '/images/Brisbane/Aus-Brisbane-QueenStreetMall.webp',
+    '/images/Brisbane/Aus-Brisbane-SouthBank.webp',
+    '/images/Brisbane/Aus-Brisbane-SouthbankView.webp',
+    '/images/Brisbane/Aus-Brisbane-StoryBridge.webp',
+  ],
+  Melbourne: [
+    '/images/Melbourne/Aus-Melbourne-FederationSquare.webp',
+    '/images/Melbourne/Aus-Melbourne-FlindersStreetStation.webp',
+    '/images/Melbourne/Aus-Melbourne-SwanstonStreet.webp',
+    '/images/Melbourne/Aus-Melbourne-YarraRiver.webp',
+    '/images/Melbourne/Aus-Melbourne-YarraRiverCrownePlaza.webp',
+  ],
+  Perth: [
+    '/images/Perth/Aus-Perth-CityNight.webp',
+    '/images/Perth/Aus-Perth-ElizabethQuay.webp',
+    '/images/Perth/Aus-Perth-KingsParkSkyline.webp',
+    '/images/Perth/Aus-Perth-SwanBellTower.webp',
+    '/images/Perth/Aus-Perth-WayWorksOffice.webp',
+  ],
+  Sydney: [
+    '/images/Sydney/Aus-Sydney-CircularQuay.webp',
+    '/images/Sydney/Aus-Sydney-CircularQuayNight.webp',
+    '/images/Sydney/Aus-Sydney-CircularQuaySkyline.webp',
+    '/images/Sydney/Aus-Sydney-HarbourBridge.webp',
+    '/images/Sydney/Aus-Sydney-OperaHouse.webp',
+  ],
+  'natural-landscapes': [
+    '/images/natural-landscapes/Aus-AliceSprings-Outback.webp',
+    '/images/natural-landscapes/Aus-Cairns-GreatBarrierReef.webp',
+    '/images/natural-landscapes/Aus-Katoomba-BlueMountains.webp',
+    '/images/natural-landscapes/Aus-PortCampbell-TwelveApostles.webp',
+    '/images/natural-landscapes/Aus-Yulara-Uluru.webp',
+  ],
+};
+
+const PLACE_ALIASES = {
+  Adelaide: ['adelaide'],
+  Brisbane: ['brisbane'],
+  Melbourne: ['melbourne'],
+  Perth: ['perth'],
+  Sydney: ['sydney'],
+  'natural-landscapes': [
+    'alice springs',
+    'alicesprings',
+    'blue mountains',
+    'bluemountains',
+    'cairns',
+    'great barrier reef',
+    'greatbarrierreef',
+    'katoomba',
+    'natural-landscapes',
+    'outback',
+    'port campbell',
+    'portcampbell',
+    'twelve apostles',
+    'twelveapostles',
+    'uluru',
+    'yulara',
+  ],
+};
+
+const getGalleryImages = ({ title, location, imageUrl }) => {
+  const mainImage = getImageUrl(imageUrl);
+  const searchableText = `${title || ''} ${location || ''} ${imageUrl || ''}`.toLowerCase();
+  const matchedPlace = Object.entries(PLACE_ALIASES).find(([, aliases]) => (
+    aliases.some((alias) => searchableText.includes(alias))
+  ))?.[0];
+
+  if (!matchedPlace) {
+    return Array.from({ length: 5 }, () => mainImage || FALLBACK);
+  }
+
+  const placeImages = GALLERY_BY_PLACE[matchedPlace].map(getImageUrl);
+
+  if (!mainImage) {
+    return placeImages;
+  }
+
+  if (placeImages.includes(mainImage)) {
+    return [mainImage, ...placeImages.filter((src) => src !== mainImage)].slice(0, 5);
+  }
+
+  return [mainImage, ...placeImages].slice(0, 5);
+};
+
+const TourImageGallery = ({ title, location, imageUrl }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  const mainImage = getImageUrl(imageUrl);
-  const galleryImages = Array.from({ length: 5 }, () => mainImage || FALLBACK);
+  const galleryImages = getGalleryImages({ title, location, imageUrl });
 
   const handleError = (event) => {
     event.currentTarget.src = FALLBACK;
