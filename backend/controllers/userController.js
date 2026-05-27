@@ -86,26 +86,7 @@ const updateUserProfile = async (req, res) => {
 };
 
 // ──────────────────────────────────────────────
-// 3. DELETE - Delete User Account
-// DELETE /api/users/profile
-// ──────────────────────────────────────────────
-const deleteUserAccount = async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        await User.findByIdAndDelete(req.user.id);
-
-        res.status(200).json({ message: 'Account deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Delete failed: ' + error.message });
-    }
-};
-
-// ──────────────────────────────────────────────
-// 4. READ - Get User by ID (Admin only)
+// 3. READ - Get User by ID (Admin only)
 // GET /api/users/:id
 // ──────────────────────────────────────────────
 const getUserById = async (req, res) => {
@@ -147,7 +128,6 @@ const getAllUsers = async (req, res) => {
 module.exports = {
     getUserProfile,
     updateUserProfile,
-    deleteUserAccount,
     getUserById,
     getAllUsers
 };

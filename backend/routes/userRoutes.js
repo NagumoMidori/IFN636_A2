@@ -2,7 +2,6 @@ const express = require('express');
 const {
     getUserProfile,
     updateUserProfile,
-    deleteUserAccount,
     getUserById,
     getAllUsers
 } = require('../controllers/userController');
@@ -13,10 +12,8 @@ const router = express.Router();
 // ── User's own profile (authenticated) ──────────
 // GET    /api/users/profile   → Read own profile
 // PUT    /api/users/profile   → Update own profile (name, email, phone, etc.)
-// DELETE /api/users/profile   → Delete own account
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
-router.delete('/profile', protect, deleteUserAccount);
 
 // ── Admin routes ────────────────────────────────
 // GET /api/users       → List all users (admin only)
