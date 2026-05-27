@@ -13,6 +13,7 @@ import Cart from './pages/Cart';
 import Payment from './pages/Payment';
 import MyBookings from './pages/MyBookings';
 import UserHome from './pages/UserHome';
+import Profile from './pages/Profile';
 
 import AdminHome from './pages/AdminHome';
 import TourList from './pages/TourList';
@@ -41,6 +42,7 @@ function App() {
           <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
           <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><UserHome /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         </Route>
 
         {/* B-end: Admin Layout */}

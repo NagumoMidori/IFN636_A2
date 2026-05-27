@@ -99,6 +99,7 @@ const Navbar = () => {
                           <Link to="/cart" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Cart</Link>
                           <Link to="/my-bookings" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">My Bookings</Link>
                           <Link to="/dashboard" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">Dashboard</Link>
+                          <Link to="/profile" onClick={() => setUserMenuOpen(false)} className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
                         </>
                       )}
                       <div className="border-t border-gray-100 mt-1 pt-1">
@@ -155,6 +156,7 @@ const Navbar = () => {
                     <Link to="/cart" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Cart {cartCount > 0 ? `(${cartCount})` : ''}</Link>
                     <Link to="/my-bookings" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">My Bookings</Link>
                     <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Dashboard</Link>
+                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">My Profile</Link>
                   </>
                 )}
                 <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Log out</button>
