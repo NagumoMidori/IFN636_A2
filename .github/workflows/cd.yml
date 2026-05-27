@@ -73,10 +73,7 @@ jobs:
       - name: Restart backend with PM2
         working-directory: backend
         run: |
-          if pm2 describe backend >/dev/null 2>&1; then
-            pm2 restart backend --update-env
-          else
-            pm2 start npm --name backend -- run prod
-          fi
+          pm2 delete backend >/dev/null 2>&1 || true
+          pm2 start npm --name backend -- run prod
 
           pm2 save
